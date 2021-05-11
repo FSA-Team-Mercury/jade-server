@@ -1,5 +1,5 @@
 const graphql = require("graphql");
-const { acc_queries, acc_mutations } = require("./type_acount");
+const { acc_queries, acc_mutations } = require("./type_account");
 const {budget_queries, budget_mutations} = require('./type_budget')
 const {savings_queries} = require('./type_saving')
 const { badge_queries, badge_mutations } = require("./type_badge");
@@ -8,7 +8,7 @@ const { user_queries, user_mutations } = require("./type_user");
 
 const { GraphQLObjectType, GraphQLSchema } = graphql;
 
-// basically a GET request
+// GET
 const RootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   fields: {

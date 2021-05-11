@@ -42,7 +42,6 @@ const account = {
   type: AccountType,
   args: { id: { type: GraphQLID } },
   resolve(parent, args) {
-    // code to get data from source/db
     return Account.findByPk(args.id);
   },
 };
@@ -54,11 +53,15 @@ const addAccount = {
     auth_token: { type: GraphQLString },
     type: { type: GraphQLString },
   },
-  resolve(parent, args) {
+  resolve(parent, args, context) {
     let account = Account.create({
       auth_token: args.auth_token,
       type: args.type,
     });
+
+    // await account.setUser(await User.findByToken(""));
+    await account.setUser(await User.findByPk(1)); //temp
+
     return account;
   },
 };
