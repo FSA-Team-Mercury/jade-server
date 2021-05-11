@@ -1,5 +1,5 @@
 const graphql = require('graphql');
-const {Budget} = require ('../db')
+const { Budget, User } = require('../db');
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -9,70 +9,118 @@ const {
   GraphQLBoolean,
 } = graphql;
 
-
 const BudgetType = new GraphQLObjectType({
   name: 'Budget',
   fields: () => ({
     id: { type: GraphQLID },
-    user_id: { type: GraphQLID },
+    userId: { type: GraphQLID },
     category: { type: GraphQLString },
-    amount: { type: GraphQLInt },
-    current_amount: { type: GraphQLInt },
+    goalAmount: { type: GraphQLInt },
+    currentAmount: { type: GraphQLInt },
     isCompleted: { type: GraphQLBoolean },
-    created_at: { type: GraphQLString },
-    end_date: { type: GraphQLString },
+    createdAt: { type: GraphQLString },
+    endDate: { type: GraphQLString },
   }),
 });
 
-// QUERIES
-//find all user budgets by type
-const userBudgets = {
+//QUERIES
+// find all budgets by category
+const budgetByCategory = {
   type: new GraphQLList(BudgetType),
-  args: { id: { type: GraphQLID }, category: { type: GraphQLString } },
-  resolve(parent, args) {
+  args: { category: { type: GraphQLString } },
+  async resolve(parent, args, context) {
+    // const user = await User.findByToken("")
+    const user = await User.findByPk(1); //temp
     return Budget.findAll({
       where: {
-        userId: args.id,
-        category: args.category
+        userId: user.id,
+        category: args.category,
       },
     });
   },
 };
 
-// find all user budgets
+// find all budgets
 const allBudgets = {
   type: new GraphQLList(BudgetType),
-  args:{id:{type: GraphQLID}},
-  resolve(parent, args){
-    return Budget.findAll()
-  }
-}
-
+  async resolve(parent, context) {
+    // const user = await User.findByToken("")
+    const user = await User.findByPk(1); //temp
+    return Budget.findAll({
+      where: {
+        userId: user.id
+      },
+    });
+  },
+};
 
 //MUTATIONS
+// create budget
 const addBudget = {
   type: BudgetType,
   args: {
-    user_id: { type: GraphQLInt },
     category: { type: GraphQLString },
-    amount: { type: GraphQLInt },
-    current_amount: { type: GraphQLInt },
-    start_date: { type: GraphQLString },
-    end_date: { type: GraphQLString },
-    isCompleted: { type: GraphQLBoolean },
+    goalAmount: { type: GraphQLInt },
+    currentAmount: { type: GraphQLInt },
+  },
+  async resolve(parent, args, context) {
+    const budget = await Budget.create({
+      category: args.category,
+      goalAmount: args.goalAmount * 100, //converting to pennies for backend
+      currentAmount: args.currentAmount,
+    });
+    // await budget.setUser(await User.findByToken(""))
+    await budget.setUser(await User.findByPk(1)); //temp
+
+    return budget;
+  },
+};
+
+//update budget
+const updateBudget = {
+  type: BudgetType,
+  args: {
+    id: { type: GraphQLInt },
+    category: { type: GraphQLString },
+    goalAmount: { type: GraphQLInt },
+  },
+  async resolve(parent, args) {
+    const budget = await Budget.findByPk(args.id);
+    budget.category = args.category
+    budget.goalAmount = args.goalAmount * 100
+
+    await budget.save();
+    return budget;
+  },
+};
+
+//delete budget
+const deleteBudget = {
+  type: BudgetType,
+  args: {
+    id: { type: GraphQLInt },
+  },
+  async resolve(parent, args) {
+    const budget = await Budget.findByPk(args.id);
+    await budget.destroy();
+
+    return true //? possible return something else
   },
 };
 
 
+
+//? delete all budgets
 
 
 module.exports = {
   budget_queries: {
-    userBudgets,
-    allBudgets
+    budgetByCategory,
+    allBudgets,
   },
   budget_mutations: {
     addBudget,
+    deleteBudget,
+    updateBudget,
   },
 };
-

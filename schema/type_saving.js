@@ -1,5 +1,5 @@
 const graphql = require('graphql');
-const { Saving } = require('../db');
+const { Saving, User } = require('../db');
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -9,33 +9,93 @@ const {
   GraphQLBoolean,
 } = graphql;
 
-const SavingsType = new GraphQLObjectType({
+const SavingType = new GraphQLObjectType({
   name: 'Savings',
   fields: () => ({
-    user_id: { type: GraphQLID },
-    amount: { type: GraphQLInt },
-    // current_amount: { type: GraphQLInt },
-    goal_date: { type: GraphQLString },
-    met_goal: { type: GraphQLBoolean },
+    id: { type: GraphQLID },
+    userId: { type: GraphQLID },
+    goalAmount: { type: GraphQLInt },
+    currentAmount: { type: GraphQLInt },
+    isCompleted: { type: GraphQLBoolean },
   }),
 });
 
-//QUERY
+//QUERIES
 // finding user savings
-const userSavings = {
-  type: new GraphQLList(SavingsType),
-  args: {id: {type:GraphQLID}},
-  resolve (parent, args){
-    return Saving.findAll({
+const allSavings = {
+  type: SavingType,
+  async resolve (parent, context){
+    // const user = await User.findByToken("")
+    const user = await User.findByPk(1); //temp
+    return Saving.findOne({
       where: {
-        userId: args.id,
+        userId: user.id
       },
     });
   }
 };
 
+//MUTATIONS
+// create saving
+const addSaving = {
+  type: SavingType,
+  args:{
+    goalAmount: {type:GraphQLInt},
+    currentAmount: {type:GraphQLInt}
+  },
+  async resolve (parent, args){
+    const saving = await Saving.create({
+      goalAmount: args.goalAmount * 100,
+      currentAmount: args.currentAmount,
+    });
+    // await saving.setUser(await User.findByToken(""))
+    await saving.setUser(await User.findByPk(1)); //temp
+
+    return saving;
+  }
+}
+
+// update saving
+const updateSaving = {
+  type: SavingType,
+  args: {
+    id: { type: GraphQLInt },
+    goalAmount: { type: GraphQLInt },
+  },
+  async resolve(parent, args) {
+    const saving = await Saving.findByPk(args.id);
+    saving.goalAmount = args.goalAmount * 100;
+
+    await saving.save();
+    return saving;
+  },
+};
+
+
+// delete saving
+const deleteSaving = {
+  type: SavingType,
+  args: {
+    id: { type: GraphQLInt },
+  },
+  async resolve(parent, args) {
+    const saving = await Saving.findByPk(args.id);
+    await saving.destroy();
+
+    return true; //? possible return something else
+  },
+};
+
+
+
+
 module.exports = {
-  savings_queries: {
-    userSavings
+  saving_queries: {
+    allSavings,
+  },
+  saving_mutations: {
+    addSaving,
+    updateSaving,
+    deleteSaving,
   },
 };
