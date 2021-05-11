@@ -1,5 +1,6 @@
 const graphql = require("graphql");
 const { Account } = require("../db");
+
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -53,8 +54,8 @@ const addAccount = {
     auth_token: { type: GraphQLString },
     type: { type: GraphQLString },
   },
-  resolve(parent, args, context) {
-    let account = Account.create({
+  async resolve(parent, args, context) {
+    let account = await Account.create({
       auth_token: args.auth_token,
       type: args.type,
     });
