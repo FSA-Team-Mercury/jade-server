@@ -55,10 +55,8 @@ async function seed() {
   const budgets = await Promise.all([
     Budget.create({
       category: "groceries",
-      amount: 20000,
-      current_amount: 1000,
-      // end_date: new Date(),
-      isCompleted: false,
+      goalAmount: 20000,
+      currentAmount: 1000,
     }),
   ]);
 
@@ -66,9 +64,8 @@ async function seed() {
 
   const savings = await Promise.all([
     Saving.create({
-      amount: 30000,
-      goal_date: new Date(),
-      met_goal: false,
+      goalAmount: 500000,
+      currentAmount: 30000,
     }),
   ]);
 
