@@ -20,4 +20,12 @@ const Challenge = db.define("challenge", {
   },
 });
 
+Challenge.beforeCreate((challenge) => {
+  const end_date = moment(challenge.endDate).format("MM-DD-YYYY");
+  challenge.endDate = String(end_date);
+
+  const start_date = moment(challenge.startDate).format("MM-DD-YYYY");
+  challenge.startDate = String(start_date);
+});
+
 module.exports = Challenge;
