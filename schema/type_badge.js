@@ -1,26 +1,30 @@
 const graphql = require("graphql");
 const { Badge, User } = require("../db");
-const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList } =
-  graphql;
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList } = graphql;
+const { UserType } = require("./type_user")
 
 const BadgeType = new GraphQLObjectType({
   name: "Badge",
   fields: () => ({
     id: { type: GraphQLID },
-    user_id: { type: GraphQLInt },
+    userId: { type: GraphQLInt },
     type: { type: GraphQLString },
+    user: {
+      type: UserType,
+      resolve(parent, args) {
+        return User.findById(parent.userId);
+      },
+    },
   }),
 });
 
 //Queries
 const userBadges = {
   type: new GraphQLList(BadgeType),
-  args: { id: { type: GraphQLID } },
-  resolve(parent, args) {
+  resolve(parent, args, context) {
     return Badge.findAll({
-      where: {
-        userId: args.id,
-      },
+      where: { userId: context.authorization, }, //use in final code
+      // where: { userId: 1 } //this line used for testing route
     });
   },
 };
@@ -44,8 +48,8 @@ const addBadge = {
     let badge = await Badge.create({
       type: args.type,
     });
-    await badge.setUser(await User.findByToken(context.authorization)); //comment out for testing routes
-    // await badge.setUser(await User.findByPk(1)) //this line used for testing routes
+    await badge.setUser(await User.findByToken(context.authorization)); //use in final code
+    // await badge.setUser(await User.findByPk(1)) //this line used for testing route
     return badge;
   },
 };
