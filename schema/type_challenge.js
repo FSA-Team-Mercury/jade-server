@@ -1,5 +1,4 @@
 const graphql = require("graphql");
-const Sequelize = require("sequelize"); //not needed?
 const { Challenge } = require("../db");
 const { UserType } = require("./type_user")
 const {
@@ -15,7 +14,6 @@ const ChallengeType = new GraphQLObjectType({
   name: "Challenge",
   fields: () => ({
     id: { type: GraphQLID },
-    // user_id: { type: GraphQLInt },
     type: { type: GraphQLString },
     startDate: { type: GraphQLString },
     endDate: { type: GraphQLString },
@@ -32,7 +30,6 @@ const ChallengeType = new GraphQLObjectType({
 //Queries
 const userChallenges = {
   type: new GraphQLList(ChallengeType),
-  // args: { id: { type: GraphQLID } },
   resolve(parent, args, context) {
     return Challenge.findAll({
       where: { userId: context.authorization, }, //use in final code
@@ -45,7 +42,6 @@ const challenge = {
   type: ChallengeType,
   args: { id: { type: GraphQLID } },
   resolve(parent, args) {
-    // code to get data from source/db
     return Challenge.findByPk(args.id);
   },
 };
