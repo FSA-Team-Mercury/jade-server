@@ -1,4 +1,6 @@
 const Sequelize = require("sequelize");
+const moment = require("moment");
+moment().format();
 const db = require("./database");
 
 const Challenge = db.define("challenge", {
@@ -20,7 +22,7 @@ const Challenge = db.define("challenge", {
   },
 });
 
-Challenge.beforeCreate((challenge) => {
+Challenge.beforeCreate(challenge => {
   const end_date = moment(challenge.endDate).format("MM-DD-YYYY");
   challenge.endDate = String(end_date);
 
