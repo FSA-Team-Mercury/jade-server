@@ -12,7 +12,7 @@ const BadgeType = new GraphQLObjectType({
     user: {
       type: UserType,
       resolve(parent, args) {
-        return User.findById(parent.userId);
+        return User.findByPk(parent.userId);
       },
     },
   }),
@@ -21,9 +21,10 @@ const BadgeType = new GraphQLObjectType({
 //Queries
 const userBadges = {
   type: new GraphQLList(BadgeType),
-  resolve(parent, args, context) {
+  async resolve(parent, args, context) {
+    const user = await User.findByToken(context.authorization)
     return Badge.findAll({
-      where: { userId: context.authorization, }, //use in final code
+      where: { userId: user.id, }, //not working??
       // where: { userId: 1 } //this line used for testing route
     });
   },

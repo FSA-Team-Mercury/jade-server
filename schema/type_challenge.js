@@ -1,5 +1,5 @@
 const graphql = require("graphql");
-const { Challenge } = require("../db");
+const { Challenge , User } = require("../db");
 const { UserType } = require("./type_user")
 const {
   GraphQLObjectType,
@@ -20,8 +20,8 @@ const ChallengeType = new GraphQLObjectType({
     completed: { type: GraphQLBoolean },
     user: {
       type: UserType,
-      resolve(parent, args) {
-        return User.findById(parent.userId);
+      async resolve(parent, args) {
+        return await User.findByPk(parent.userId);
       },
     },
   }),
@@ -30,9 +30,10 @@ const ChallengeType = new GraphQLObjectType({
 //Queries
 const userChallenges = {
   type: new GraphQLList(ChallengeType),
-  resolve(parent, args, context) {
+  async resolve(parent, args, context) {
+    const user = await User.findByToken(context.authorization)
     return Challenge.findAll({
-      where: { userId: context.authorization, }, //use in final code
+      where: { userId: user.id, }, //use in final code
       // where: { userId: 1 } //this line used for testing route
     });
   },
