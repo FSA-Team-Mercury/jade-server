@@ -18,7 +18,6 @@ app.use("/plaid", require("./plaid"));
 app.use(
   "/graphql",
   graphqlHTTP((req, res, graphQLParams) => {
-    console.log(graphQLParams);
     return {
       schema,
       graphiql: true,
