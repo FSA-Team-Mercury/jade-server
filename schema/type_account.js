@@ -1,13 +1,8 @@
 const graphql = require("graphql");
-const { Account } = require("../db");
+const { Account, User } = require("../db");
 
-const {
-  GraphQLObjectType,
-  GraphQLString,
-  GraphQLID,
-  GraphQLInt,
-  GraphQLList,
-} = graphql;
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList } =
+  graphql;
 
 const AccountType = new GraphQLObjectType({
   name: "Account",
@@ -60,8 +55,7 @@ const addAccount = {
       type: args.type,
     });
 
-    // await account.setUser(await User.findByToken(""));
-    await account.setUser(await User.findByPk(1)); //temp
+    await account.setUser(await User.findByToken(context.authorization)); //temp
 
     return account;
   },
@@ -76,4 +70,5 @@ module.exports = {
   acc_mutations: {
     addAccount,
   },
+  AccountType,
 };
