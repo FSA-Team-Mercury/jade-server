@@ -14,7 +14,7 @@ const Challenge = db.define("challenge", {
   },
   endDate: {
     type: Sequelize.DATE,
-    allowNull: false,
+    // allowNull: false, //this causes the route to break, even when an end date is entered
   },
   completed: {
     type: Sequelize.BOOLEAN,

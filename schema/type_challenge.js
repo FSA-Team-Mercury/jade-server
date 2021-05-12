@@ -1,6 +1,6 @@
 const graphql = require("graphql");
-const Sequelize = require("sequelize");
-const { Challenge } = require("../db");
+const { Challenge , User } = require("../db");
+// const { UserType } = require("./type_user")
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -14,7 +14,6 @@ const ChallengeType = new GraphQLObjectType({
   name: "Challenge",
   fields: () => ({
     id: { type: GraphQLID },
-    user_id: { type: GraphQLInt },
     type: { type: GraphQLString },
     startDate: { type: GraphQLString },
     endDate: { type: GraphQLString },
@@ -25,12 +24,11 @@ const ChallengeType = new GraphQLObjectType({
 //Queries
 const userChallenges = {
   type: new GraphQLList(ChallengeType),
-  args: { id: { type: GraphQLID } },
-  resolve(parent, args) {
+  async resolve(parent, args, context) {
+    const user = await User.findByToken(context.authorization)
     return Challenge.findAll({
-      where: {
-        userId: args.id,
-      },
+      where: { userId: user.id, }, //use in final code
+      // where: { userId: 1 } //this line used for testing route
     });
   },
 };
@@ -39,7 +37,6 @@ const challenge = {
   type: ChallengeType,
   args: { id: { type: GraphQLID } },
   resolve(parent, args) {
-    // code to get data from source/db
     return Challenge.findByPk(args.id);
   },
 };
@@ -56,8 +53,8 @@ const addChallenge = {
     let challenge = await Challenge.create({
       type: args.type,
     });
-    // await challenge.setUser(await User.findByToken(context.authorization)) //comment out for testing routes
-    await challenge.setUser(await User.findByPk(1)); //this line used for testing routes
+    await challenge.setUser(await User.findByToken(context.authorization)) //use in final code
+    // await challenge.setUser(await User.findByPk(1)); //this line used for testing routes
     return challenge;
   },
 };
@@ -84,4 +81,5 @@ module.exports = {
     addChallenge,
     completeChallenge,
   },
+  ChallengeType
 };

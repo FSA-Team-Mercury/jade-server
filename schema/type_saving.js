@@ -38,4 +38,5 @@ module.exports = {
   savings_queries: {
     userSavings
   },
+  SavingsType,
 };
