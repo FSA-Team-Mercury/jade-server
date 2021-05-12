@@ -124,4 +124,5 @@ module.exports = {
     deleteBudget,
     updateBudget,
   },
+  BudgetType,
 };

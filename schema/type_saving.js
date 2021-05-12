@@ -93,4 +93,5 @@ module.exports = {
     updateSaving,
     deleteSaving,
   },
+  SavingsType,
 };
