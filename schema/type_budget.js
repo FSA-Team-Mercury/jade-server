@@ -9,6 +9,9 @@ const {
   GraphQLBoolean,
 } = graphql;
 
+const TEST_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjIwNzg1ODU4fQ.vuV-tHzLjx8WEJZ6AB0c3oMat978pbK1831uIu1X9GU';
+
 const BudgetType = new GraphQLObjectType({
   name: 'Budget',
   fields: () => ({
@@ -29,8 +32,7 @@ const budgetByCategory = {
   type: new GraphQLList(BudgetType),
   args: { category: { type: GraphQLString } },
   async resolve(parent, args, context) {
-    // const user = await User.findByToken("")
-    const user = await User.findByPk(1); //temp
+    const user = await User.findByToken(context.authorization);
     return Budget.findAll({
       where: {
         userId: user.id,
@@ -44,11 +46,11 @@ const budgetByCategory = {
 const allBudgets = {
   type: new GraphQLList(BudgetType),
   async resolve(parent, context) {
-    // const user = await User.findByToken("")
-    const user = await User.findByPk(1); //temp
+    const user = await User.findByToken(context.authorization);
+
     return Budget.findAll({
       where: {
-        userId: user.id
+        userId: user.id,
       },
     });
   },
@@ -64,14 +66,13 @@ const addBudget = {
     currentAmount: { type: GraphQLInt },
   },
   async resolve(parent, args, context) {
+    const user = await User.findByToken(context.authorization);
     const budget = await Budget.create({
       category: args.category,
       goalAmount: args.goalAmount * 100, //converting to pennies for backend
       currentAmount: args.currentAmount,
     });
-    // await budget.setUser(await User.findByToken(""))
-    await budget.setUser(await User.findByPk(1)); //temp
-
+    await budget.setUser(user.id);
     return budget;
   },
 };
@@ -84,13 +85,15 @@ const updateBudget = {
     category: { type: GraphQLString },
     goalAmount: { type: GraphQLInt },
   },
-  async resolve(parent, args) {
+  async resolve(parent, args, context) {
+    const user = await User.findByToken(context.authorization);
     const budget = await Budget.findByPk(args.id);
-    budget.category = args.category
-    budget.goalAmount = args.goalAmount * 100
-
-    await budget.save();
-    return budget;
+    if (user.id === budget.userId) {
+      budget.category = args.category;
+      budget.goalAmount = args.goalAmount * 100;
+      await budget.save();
+      return budget;
+    }
   },
 };
 
@@ -100,18 +103,17 @@ const deleteBudget = {
   args: {
     id: { type: GraphQLInt },
   },
-  async resolve(parent, args) {
+  async resolve(parent, args, context) {
+    const user = await User.findByToken(context.authorization);
     const budget = await Budget.findByPk(args.id);
-    await budget.destroy();
 
-    return true //? possible return something else
+    if (user.id === budget.userId) {
+      const budget = await Budget.findByPk(args.id);
+      await budget.destroy();
+      return budget;
+    }
   },
 };
-
-
-
-//? delete all budgets
-
 
 module.exports = {
   budget_queries: {
