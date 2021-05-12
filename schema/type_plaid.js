@@ -76,12 +76,11 @@ const TokenType = new GraphQLObjectType({
 // QUERY
 const plaid = {
   type: PlaidObjectType,
-  args: {
-    access_token: { type: GraphQLString },
-  },
   async resolve(parent, args, context) {
+    const user = await User.findByToken(context.authorization);
+    const accts = await user.getAccounts();
     const { data } = await plaidClient.transactionsGet({
-      access_token: args.access_token,
+      access_token: accts[0].auth_token,
       start_date: "2021-03-01",
       end_date: "2021-05-01",
     });
