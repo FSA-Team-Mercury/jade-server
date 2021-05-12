@@ -1,6 +1,6 @@
 const graphql = require("graphql");
 const { Challenge , User } = require("../db");
-const { UserType } = require("./type_user")
+// const { UserType } = require("./type_user")
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -18,12 +18,6 @@ const ChallengeType = new GraphQLObjectType({
     startDate: { type: GraphQLString },
     endDate: { type: GraphQLString },
     completed: { type: GraphQLBoolean },
-    user: {
-      type: UserType,
-      async resolve(parent, args) {
-        return await User.findByPk(parent.userId);
-      },
-    },
   }),
 });
 
@@ -87,4 +81,5 @@ module.exports = {
     addChallenge,
     completeChallenge,
   },
+  ChallengeType
 };

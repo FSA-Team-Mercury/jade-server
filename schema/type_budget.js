@@ -74,5 +74,6 @@ module.exports = {
   budget_mutations: {
     addBudget,
   },
+  BudgetType,
 };
 

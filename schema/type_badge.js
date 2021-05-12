@@ -1,7 +1,6 @@
 const graphql = require("graphql");
 const { Badge, User } = require("../db");
 const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList } = graphql;
-const { UserType } = require("./type_user")
 
 const BadgeType = new GraphQLObjectType({
   name: "Badge",
@@ -9,12 +8,6 @@ const BadgeType = new GraphQLObjectType({
     id: { type: GraphQLID },
     userId: { type: GraphQLInt },
     type: { type: GraphQLString },
-    user: {
-      type: UserType,
-      resolve(parent, args) {
-        return User.findByPk(parent.userId);
-      },
-    },
   }),
 });
 
@@ -63,4 +56,5 @@ module.exports = {
   badge_mutations: {
     addBadge,
   },
+  BadgeType,
 };
