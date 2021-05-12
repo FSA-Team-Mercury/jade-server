@@ -1,7 +1,7 @@
 const graphql = require("graphql");
-const { User } = require("../db");
-const { GraphQLObjectType, GraphQLString, GraphQLID } = graphql;
-
+const { User, Account } = require("../db");
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } = graphql;
+const { AccountType } = require("./type_account");
 // TYPE
 const UserType = new GraphQLObjectType({
   name: "User",
@@ -9,6 +9,17 @@ const UserType = new GraphQLObjectType({
     id: { type: GraphQLID },
     username: { type: GraphQLString },
     password: { type: GraphQLString },
+    accounts: {
+      type: GraphQLList(AccountType),
+      async resolve(parent) {
+        const accounts = await Account.findAll({
+          where: {
+            userId: parent.id,
+          },
+        });
+        return accounts;
+      },
+    },
   }),
 });
 
@@ -23,7 +34,6 @@ const user = {
   type: UserType,
   resolve(parent, args, context) {
     // code to get data from source/db
-    console.log("token -->", context.authorization);
     return User.findByToken(context.authorization);
   },
 };
@@ -36,6 +46,7 @@ const logIn = {
     password: { type: GraphQLString },
   },
   async resolve(parent, args) {
+    console.log(User.prototype);
     const token = await User.authenticate({
       username: args.username,
       password: args.password,
