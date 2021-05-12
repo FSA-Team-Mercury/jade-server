@@ -2,8 +2,7 @@ const graphql = require('graphql');
 const { Saving, User } = require('../db');
 const { GraphQLObjectType, GraphQLID, GraphQLInt, GraphQLBoolean } = graphql;
 
-const TEST_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjIwNzg1ODU4fQ.vuV-tHzLjx8WEJZ6AB0c3oMat978pbK1831uIu1X9GU';
+
 
 const SavingType = new GraphQLObjectType({
   name: 'Savings',
