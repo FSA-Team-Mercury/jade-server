@@ -3,8 +3,6 @@ require("dotenv").config();
 
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
-const plaid = require("plaid");
-
 const configuration = new Configuration({
   basePath: PlaidEnvironments.sandbox,
   baseOptions: {
@@ -27,10 +25,9 @@ router.get("/testing", (req, res, next) => {
 // POST /plaid/links/token/create
 router.post("/link/token/create", async (req, res, next) => {
   const client_user_id = req.body.client_user_id;
-  console.log("in router");
   const request = {
     user: {
-      client_user_id: String(client_user_id),
+      client_user_id: client_user_id,
     },
     client_name: "Plaid Test App",
     products: ["transactions"],
@@ -61,8 +58,7 @@ router.post("/get_access_token", async function (req, res, next) {
       public_token: publicToken,
     });
     const accessToken = data.access_token;
-    const itemID = data.item_id;
-    res.send(data);
+    res.send(accessToken);
   } catch (error) {
     // handle error
     next(error);
@@ -75,12 +71,11 @@ router.post("/transactions", async (req, res, next) => {
     const access_token = req.body.access_token;
     const { data } = await plaidClient.transactionsGet({
       access_token,
-      start_date: "2021-01-01",
+      start_date: "2021-03-01",
       end_date: "2021-05-01",
     });
 
-    console.log(data.transactions);
-    res.send(data.transactions);
+    res.json(data.transactions);
   } catch (error) {
     next(error);
   }

@@ -8,6 +8,7 @@ const Account = db.define("account", {
   },
   type: {
     type: Sequelize.ENUM("checking", "savings"),
+    defaultValue: "checking",
     allowNull: false,
   },
 });
