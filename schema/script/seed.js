@@ -6,7 +6,7 @@ const {
   Challenge,
   Budget,
   Saving,
-} = require("../db");
+} = require("../server/db");
 
 async function seed() {
   await db.sync({ force: true }); // clears db and matches models to tables
@@ -55,8 +55,9 @@ async function seed() {
   const budgets = await Promise.all([
     Budget.create({
       category: "groceries",
-      goalAmount: 20000,
+      amount: 20000,
       currentAmount: 1000,
+      isCompleted: false,
     }),
   ]);
 
@@ -64,8 +65,9 @@ async function seed() {
 
   const savings = await Promise.all([
     Saving.create({
-      goalAmount: 500000,
-      currentAmount: 30000,
+      amount: 30000,
+      goalDate: new Date(),
+      metGoal: false,
     }),
   ]);
 

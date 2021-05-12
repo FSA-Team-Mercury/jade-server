@@ -3,6 +3,7 @@ const db = require("./database");
 const moment = require("moment");
 moment().format();
 
+
 const Budget = db.define("budget", {
   category: {
     type: Sequelize.ENUM("groceries", "entertainment", "bills", "other"),
@@ -17,6 +18,7 @@ const Budget = db.define("budget", {
     defaultValue: 0,
     allowNull: false,
   },
+  // obtaining from Plaid
   currentAmount: {
     type: Sequelize.INTEGER,
     defaultValue: 0,
@@ -39,9 +41,11 @@ const Budget = db.define("budget", {
 });
 
 Budget.beforeCreate((budget) => {
-  const endOfMonth = moment(budget.endDate).endOf("month");
-  const startDate = moment(endOfMonth).format("MM-DD-YYYY");
-  budget.endDate = String(startDate);
+
+  const endOfMonth = moment(budget.endDate).endOf('month');
+  const endDate = moment(endOfMonth).format('MM-DD-YYYY');
+  budget.endDate = String(endDate);
+
 });
 
 Budget.beforeCreate((budget) => {

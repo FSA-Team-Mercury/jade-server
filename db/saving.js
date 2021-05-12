@@ -1,24 +1,45 @@
 const Sequelize = require('sequelize')
 const db = require('./database')
+const moment = require('moment');
+moment().format();
 
 const Saving = db.define('saving', {
-  amount: {
-    type : Sequelize.INTEGER,
-    allowNull: false
+  goalAmount: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
   },
   //obtaining from Plaid
-  // current_ammount : {
-  //   type: Sequelize.INTEGER,
-  //   allowNull: false
-  // },
-  goal_date:{
-    type: Sequelize.DATEONLY, 
-    allowNull: false
+  currentAmount: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
   },
-  met_goal: {
+  // by end of month
+  endDate: {
+    type: Sequelize.STRING,
+    defaultValue: String(new Date()),
+  },
+  // just keep month
+  startDate: {
+    type: Sequelize.STRING,
+    defaultValue: String(new Date()),
+  },
+  isCompleted: {
     type: Sequelize.BOOLEAN,
-    allowNull: false
+    defaultValue: false,
   },
-})
+});
+
+
+Saving.beforeCreate((saving) => {
+  const endOfMonth = moment(saving.endDate).endOf('month');
+  const endDate = moment(endOfMonth).format('MM-DD-YYYY');
+  saving.endDate = String(endDate);
+});
+
+Saving.beforeCreate((saving) => {
+  const startOfMonth = moment(saving.startDate).startOf('month');
+  const startDate = moment(startOfMonth).format('MMMM');
+  saving.startDate = String(startDate);
+});
 
 module.exports = Saving
