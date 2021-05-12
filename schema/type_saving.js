@@ -1,11 +1,9 @@
-const graphql = require('graphql');
-const { Saving, User } = require('../db');
+const graphql = require("graphql");
+const { Saving, User } = require("../db");
 const { GraphQLObjectType, GraphQLID, GraphQLInt, GraphQLBoolean } = graphql;
 
-
-
 const SavingType = new GraphQLObjectType({
-  name: 'Savings',
+  name: "Savings",
   fields: () => ({
     id: { type: GraphQLID },
     userId: { type: GraphQLID },
@@ -93,5 +91,5 @@ module.exports = {
     updateSaving,
     deleteSaving,
   },
-  SavingsType,
+  SavingType,
 };

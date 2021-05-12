@@ -16,6 +16,16 @@ const configuration = new Configuration({
 
 const plaidClient = new PlaidApi(configuration);
 
+// GET plaid/catagories
+router.get("/categories", async (req, res, next) => {
+  // res.send("here");
+  const response = await plaidClient.getCategories(params => {
+    console.log("props-->", props);
+  });
+  const categories = response.categories;
+  res.send(categories);
+});
+
 // GET plaid/testing
 router.get("/testing", (req, res, next) => {
   console.log("in router");
