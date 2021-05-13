@@ -58,8 +58,8 @@ const TransactionTye = new GraphQLObjectType({
   fields: () => ({
     account_id: { type: GraphQLID },
     amount: { type: GraphQLFloat },
-    category: { type: GraphQLString },
-    date: { type: GraphQLInt },
+    category: { type: GraphQLList(GraphQLString) },
+    date: { type: GraphQLString },
     pending: { type: GraphQLBoolean },
     merchant_name: { type: GraphQLString },
   }),
