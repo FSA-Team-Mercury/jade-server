@@ -95,7 +95,7 @@ const logIn = {
     password: { type: GraphQLString },
   },
   async resolve(parent, args) {
-    console.log(User.prototype);
+    //console.log(User.prototype);
     const token = await User.authenticate({
       username: args.username,
       password: args.password,
@@ -109,6 +109,7 @@ const signUp = {
   args: {
     username: { type: GraphQLString },
     password: { type: GraphQLString },
+    email: { type: GraphQLString },
   },
   resolve(parent, args) {
     let user = User.create({
