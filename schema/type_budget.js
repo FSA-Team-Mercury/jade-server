@@ -9,8 +9,6 @@ const {
   GraphQLBoolean,
 } = graphql;
 
-
-
 const BudgetType = new GraphQLObjectType({
   name: 'Budget',
   fields: () => ({
@@ -81,14 +79,13 @@ const updateBudget = {
   type: BudgetType,
   args: {
     id: { type: GraphQLInt },
-    category: { type: GraphQLString },
+
     goalAmount: { type: GraphQLInt },
   },
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
     const budget = await Budget.findByPk(args.id);
     if (user.id === budget.userId) {
-      budget.category = args.category;
       budget.goalAmount = args.goalAmount * 100;
       await budget.save();
       return budget;
