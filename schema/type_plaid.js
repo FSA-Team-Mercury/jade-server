@@ -32,7 +32,15 @@ const BalancesType = new GraphQLObjectType({
     limit: { type: GraphQLFloat },
   }),
 });
-
+const InstitutionType = new GraphQLObjectType({
+  name: "PlaidInst",
+  fields: () => ({
+    logo: { type: GraphQLString },
+    name: { type: GraphQLString },
+    url: { type: GraphQLString },
+    primary_color: { type: GraphQLString },
+  }),
+});
 const AccountType = new GraphQLObjectType({
   name: "PlaidAccount",
   fields: () => ({
@@ -63,6 +71,7 @@ const PlaidObjectType = new GraphQLObjectType({
     accounts: { type: GraphQLList(AccountType) },
     transactions: { type: GraphQLList(TransactionTye) },
     total_transactions: { type: GraphQLInt },
+    institution: { type: InstitutionType },
   }),
 });
 
@@ -79,13 +88,25 @@ const plaid = {
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
     const accts = await user.getAccounts();
-    const { data } = await plaidClient.transactionsGet({
+    const res = await plaidClient.transactionsGet({
       access_token: accts[0].auth_token,
       start_date: "2021-03-01",
       end_date: "2021-05-01",
     });
-    console.log("server data-->", data);
-    return data;
+
+    const insitutionID = res.data.item.institution_id;
+    const request = {
+      institution_id: insitutionID,
+      country_codes: ["US", "GB"],
+      options: {
+        include_optional_metadata: true,
+      },
+    };
+
+    const { data: inst_data } = await plaidClient.institutionsGetById(request);
+    const { institution } = inst_data;
+
+    return { ...res.data, institution };
   },
 };
 
