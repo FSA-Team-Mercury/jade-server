@@ -84,7 +84,7 @@ const plaid = {
       start_date: "2021-03-01",
       end_date: "2021-05-01",
     });
-    console.log("server data-->", data);
+    console.log("server data-->", data.transactions);
     return data;
   },
 };
