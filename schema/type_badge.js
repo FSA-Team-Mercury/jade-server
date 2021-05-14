@@ -8,6 +8,7 @@ const BadgeType = new GraphQLObjectType({
     id: { type: GraphQLID },
     userId: { type: GraphQLInt },
     type: { type: GraphQLString },
+    imageUrl: {type: GraphQLString },
   }),
 });
 
