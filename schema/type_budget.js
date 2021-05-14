@@ -64,10 +64,21 @@ const addBudget = {
   },
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
+    const existingBudget = await Budget.findAll({
+      where: {
+        userId : user.id,
+        category: args.category,
+        isCompleted: false
+      }
+    })
+    if(existingBudget){
+      throw new Error('Budget already exists')
+    }
+    console.log("in TYPE_budget", args)
     const budget = await Budget.create({
       category: args.category,
       goalAmount: args.goalAmount * 100, //converting to pennies for backend
-      currentAmount: args.currentAmount,
+      currentAmount: args.currentAmount * 100,
     });
     await budget.setUser(user.id);
     return budget;
