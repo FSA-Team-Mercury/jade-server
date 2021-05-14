@@ -63,11 +63,24 @@ const addBudget = {
     currentAmount: { type: GraphQLInt },
   },
   async resolve(parent, args, context) {
+    console.log('in TYPE_budget', args);
     const user = await User.findByToken(context.authorization);
+    const existingBudget = await Budget.findAll({
+      where: {
+        userId : user.id,
+        category: args.category,
+        isCompleted: false
+      }
+    })
+    console.log('IN ADD BUDGET ------->', existingBudget);
+    if(existingBudget.length){
+      throw new Error('Budget already exists')
+    }
+
     const budget = await Budget.create({
       category: args.category,
       goalAmount: args.goalAmount * 100, //converting to pennies for backend
-      currentAmount: args.currentAmount,
+      currentAmount: args.currentAmount * 100,
     });
     await budget.setUser(user.id);
     return budget;
