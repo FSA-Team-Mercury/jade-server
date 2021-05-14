@@ -24,15 +24,15 @@ async function seed() {
     }),
   ]);
 
-  const accounts = await Promise.all([
-    Account.create({
-      auth_token: "xxxxxxxxxx",
-      type: "checking",
-    }),
-  ]);
+  // const accounts = await Promise.all([
+  //   Account.create({
+  //     auth_token: "xxxxxxxxxx",
+  //     type: "checking",
+  //   }),
+  // ]);
 
-  const codyChecking = accounts[0];
-  await codyChecking.setUser(users[0]);
+  // const codyChecking = accounts[0];
+  // await codyChecking.setUser(users[0]);
 
   const challenges = await Promise.all([
     Challenge.create({
@@ -40,36 +40,99 @@ async function seed() {
       endDate: "2021-05-31 06:00:00",
       completed: false,
     }),
+    Challenge.create({
+      type: "big-spender",
+      endDate: "2021-07-31 06:00:00",
+      completed: false,
+    }),
   ]);
 
   await challenges[0].setUser(users[1]);
+  await challenges[0].setUser(users[0]);
 
   const badges = await Promise.all([
     Badge.create({
       type: "big-saver",
     }),
+    Badge.create({
+      type: "traveler",
+    }),
+    Badge.create({
+      type: "hermit",
+    }),
+    Badge.create({
+      type: "smart-shopper",
+    }),
+    Badge.create({
+      type: "big-spender",
+    }),
   ]);
 
   await badges[0].setUser(users[0]);
+  await badges[1].setUser(users[0]);
+  await badges[2].setUser(users[1]);
+  await badges[3].setUser(users[1]);
+  await badges[4].setUser(users[0]);
 
   const budgets = await Promise.all([
     Budget.create({
-      category: "groceries",
+      category: "Food and Drink",
       goalAmount: 20000,
       currentAmount: 1000,
+    }),
+    Budget.create({
+      category: "Payment",
+      goalAmount: 5000,
+      currentAmount: 3000,
+    }),
+    Budget.create({
+      category: "Entertainment",
+      goalAmount: 50000,
+      currentAmount: 60000,
+    }),
+    Budget.create({
+      category: "Other",
+      goalAmount: 2200,
+      currentAmount: 800,
+    }),
+    Budget.create({
+      category: "Shops",
+      goalAmount: 2200,
+      currentAmount: 800,
+    }),
+    Budget.create({
+      category: "Travel",
+      goalAmount: 2500,
+      currentAmount: 900,
+    }),
+    Budget.create({
+      category: "Entertainment",
+      goalAmount: 4000,
+      currentAmount: 7000,
     }),
   ]);
 
   await budgets[0].setUser(users[0]);
+  await budgets[1].setUser(users[0]);
+  await budgets[2].setUser(users[1]);
+  await budgets[3].setUser(users[1]);
+  await budgets[4].setUser(users[0]);
+  await budgets[5].setUser(users[1]);
+  await budgets[6].setUser(users[0]);
 
   const savings = await Promise.all([
     Saving.create({
       goalAmount: 500000,
       currentAmount: 30000,
     }),
+    Saving.create({
+      goalAmount: 20000,
+      currentAmount: 70000,
+    }),
   ]);
 
   await savings[0].setUser(users[0]);
+  await savings[1].setUser(users[1]);
 
   return {
     users: {

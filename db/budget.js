@@ -6,9 +6,9 @@ moment().format();
 
 const Budget = db.define("budget", {
   category: {
-    type: Sequelize.ENUM("groceries", "entertainment", "bills", "other"),
+    type: Sequelize.ENUM("Entertainment", "Other", "Food and Drink", "Shops", "Transfer", "Payment", "Travel", "Recreation"),
     allowNull: false,
-    defaultValue: "other",
+    defaultValue: "Other",
   },
   goalAmount: {
     type: Sequelize.INTEGER,
