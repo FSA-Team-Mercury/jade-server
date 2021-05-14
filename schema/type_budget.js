@@ -63,6 +63,7 @@ const addBudget = {
     currentAmount: { type: GraphQLInt },
   },
   async resolve(parent, args, context) {
+    console.log('in TYPE_budget', args);
     const user = await User.findByToken(context.authorization);
     const existingBudget = await Budget.findAll({
       where: {
@@ -71,10 +72,11 @@ const addBudget = {
         isCompleted: false
       }
     })
-    if(existingBudget){
+    console.log('IN ADD BUDGET ------->', existingBudget);
+    if(existingBudget.length){
       throw new Error('Budget already exists')
     }
-    console.log("in TYPE_budget", args)
+
     const budget = await Budget.create({
       category: args.category,
       goalAmount: args.goalAmount * 100, //converting to pennies for backend
