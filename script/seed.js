@@ -8,6 +8,7 @@ const {
   Challenge,
   Budget,
   Saving,
+  Friend
 } = require("../db");
 
 async function seed() {
@@ -25,7 +26,6 @@ async function seed() {
       password: "12345",
     }),
   ]);
-
   // const accounts = await Promise.all([
   //   Account.create({
   //     auth_token: "xxxxxxxxxx",
@@ -113,6 +113,8 @@ async function seed() {
       currentAmount: 7000,
     }),
   ]);
+  // console.log('user 1-->', users[0])
+  await users[0].setFriend(users[1])
 
   await budgets[0].setUser(users[0]);
   await budgets[1].setUser(users[0]);

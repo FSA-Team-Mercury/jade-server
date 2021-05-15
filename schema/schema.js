@@ -8,6 +8,7 @@ const { badge_queries, badge_mutations } = require("./type_badge");
 const { challenge_queries, challenge_mutations } = require("./type_challenge");
 const { user_queries, user_mutations } = require("./type_user");
 const { plaid_queries, plaid_mutations } = require("./type_plaid");
+const {friend_queries, friend_mutations} = require('./type_friend')
 const { GraphQLObjectType, GraphQLSchema } = graphql;
 
 // GET
@@ -21,7 +22,7 @@ const RootQuery = new GraphQLObjectType({
     ...user_queries,
     ...saving_queries,
     ...plaid_queries,
-
+    // ...friend_queries
   },
 });
 
@@ -36,6 +37,7 @@ const Mutation = new GraphQLObjectType({
     ...user_mutations,
     ...saving_mutations,
     ...plaid_mutations,
+    // ...friend_mutations
   },
 });
 
