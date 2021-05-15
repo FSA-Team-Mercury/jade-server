@@ -1,5 +1,5 @@
-const graphql = require('graphql');
-const { Budget, User } = require('../db');
+const graphql = require("graphql");
+const { Budget, User } = require("../db");
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -10,7 +10,7 @@ const {
 } = graphql;
 
 const BudgetType = new GraphQLObjectType({
-  name: 'Budget',
+  name: "Budget",
   fields: () => ({
     id: { type: GraphQLID },
     userId: { type: GraphQLID },
@@ -40,16 +40,16 @@ const budgetByCategory = {
 };
 
 // find all budgets
-const allBudgets = {
+const budgets = {
   type: new GraphQLList(BudgetType),
-  async resolve(parent, context) {
+  async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
-
-    return Budget.findAll({
+    const budgets = await Budget.findAll({
       where: {
         userId: user.id,
       },
     });
+    return budgets;
   },
 };
 
@@ -89,8 +89,7 @@ const addBudget = {
 const updateBudget = {
   type: BudgetType,
   args: {
-    id: { type: GraphQLInt },
-
+    id: { type: GraphQLID },
     goalAmount: { type: GraphQLInt },
   },
   async resolve(parent, args, context) {
@@ -108,24 +107,28 @@ const updateBudget = {
 const deleteBudget = {
   type: BudgetType,
   args: {
-    id: { type: GraphQLInt },
+    id: { type: GraphQLID },
   },
   async resolve(parent, args, context) {
+    console.log("auth -->", context.authorization);
     const user = await User.findByToken(context.authorization);
-    const budget = await Budget.findByPk(args.id);
+    const budget = await Budget.findOne({
+      where: {
+        id: args.id,
+        userId: user.id,
+      },
+    });
 
-    if (user.id === budget.userId) {
-      const budget = await Budget.findByPk(args.id);
-      await budget.destroy();
-      return budget;
-    }
+    await budget.destroy();
+
+    return budget;
   },
 };
 
 module.exports = {
   budget_queries: {
     budgetByCategory,
-    allBudgets,
+    budgets,
   },
   budget_mutations: {
     addBudget,
