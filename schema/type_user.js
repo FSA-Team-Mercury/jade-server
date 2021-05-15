@@ -81,7 +81,7 @@ const AuthType = new GraphQLObjectType({
 // QUERY
 const user = {
   type: UserType,
-  resolve(parent, args, context) {
+  async resolve(parent, args, context) {
     // code to get data from source/db
     return User.findByToken(context.authorization);
   },
