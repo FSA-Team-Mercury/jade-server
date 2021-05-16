@@ -110,6 +110,14 @@ const signUp = {
     password: { type: GraphQLString },
   },
   async resolve(parent, args) {
+    console.log("user name: ", args.username);
+    const user = await User.findOne({
+      where: { username: args.username },
+    });
+
+    if (user) {
+      throw new Error("This user already exists");
+    }
     await User.create({
       username: args.username,
       password: args.password,
