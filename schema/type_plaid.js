@@ -93,7 +93,6 @@ const plaid = {
       start_date: "2021-03-01",
       end_date: "2021-05-01",
     });
-
     const insitutionID = res.data.item.institution_id;
     const request = {
       institution_id: insitutionID,
@@ -102,11 +101,10 @@ const plaid = {
         include_optional_metadata: true,
       },
     };
-
     const { data: inst_data } = await plaidClient.institutionsGetById(request);
     const { institution } = inst_data;
-
     return { ...res.data, institution };
+
   },
 };
 

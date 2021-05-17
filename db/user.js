@@ -26,6 +26,10 @@ const User = db.define("user", {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  profileImage:{
+    type: Sequelize.TEXT,
+    allowNull: true
+  }
 });
 
 module.exports = User;
@@ -90,6 +94,7 @@ const hashPassword = async (user) => {
     user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
   }
 };
+
 
 User.beforeCreate(hashPassword);
 User.beforeUpdate(hashPassword);
