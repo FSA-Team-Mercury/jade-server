@@ -126,6 +126,7 @@ const IntFriendType = new GraphQLObjectType({
     id: {type: GraphQLID}
   })
 })
+
 // const mutualFriends = {
 //   type: new GraphQLList(MutualFriendsType),
 //   args:{
@@ -321,9 +322,11 @@ const unfollowUser = {
         }
       })
       if (caseOne){
-        await caseOne.destroy()
+        const deleted = await caseOne.destroy()
+        console.log(deleted)
       }else{
-        await caseTwo.destroy
+        const deleted = await caseTwo.destroy()
+        console.log(deleted)
       }
       return {
         id: user.Id,
