@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { User, Account } = require("../db");
+const moment = require("moment");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 const {
   GraphQLObjectType,
@@ -9,6 +10,7 @@ const {
   GraphQLList,
   GraphQLFloat,
   GraphQLBoolean,
+  GraphQLScalarType,
 } = require("graphql");
 
 const configuration = new Configuration({
@@ -27,9 +29,8 @@ const plaidClient = new PlaidApi(configuration);
 const BalancesType = new GraphQLObjectType({
   name: "Balances",
   fields: () => ({
-    available: { type: GraphQLFloat },
     current: { type: GraphQLFloat },
-    limit: { type: GraphQLFloat },
+    iso_currency_code: { type: GraphQLString },
   }),
 });
 const InstitutionType = new GraphQLObjectType({
@@ -44,12 +45,11 @@ const InstitutionType = new GraphQLObjectType({
 const AccountType = new GraphQLObjectType({
   name: "PlaidAccount",
   fields: () => ({
-    account_id: { type: GraphQLID },
+    account_id: { type: GraphQLString },
     type: { type: GraphQLString },
     subtype: { type: GraphQLString },
     name: { type: GraphQLString },
     balances: { type: BalancesType },
-    offical_name: { type: GraphQLString },
   }),
 });
 
@@ -87,11 +87,18 @@ const plaid = {
   type: PlaidObjectType,
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
+    console.log(" check 1");
     const accts = await user.getAccounts();
+    console.log(" check 2");
+    // retrieve data from beginning of month until the day of request
+    const beginnignOfMonth = moment(new Date())
+      .startOf("month")
+      .format("YYYY-MM-DD");
+    const now = moment(new Date()).format("YYYY-MM-DD");
     const res = await plaidClient.transactionsGet({
       access_token: accts[0].auth_token,
-      start_date: "2021-03-01",
-      end_date: "2021-05-01",
+      start_date: beginnignOfMonth,
+      end_date: now,
     });
     const insitutionID = res.data.item.institution_id;
     const request = {
