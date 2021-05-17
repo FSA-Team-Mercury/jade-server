@@ -87,9 +87,8 @@ const plaid = {
   type: PlaidObjectType,
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
-    console.log(" check 1");
+
     const accts = await user.getAccounts();
-    console.log(" check 2");
     // retrieve data from beginning of month until the day of request
     const beginnignOfMonth = moment(new Date())
       .startOf("month")
@@ -100,7 +99,7 @@ const plaid = {
       start_date: beginnignOfMonth,
       end_date: now,
     });
-
+    console.log(res.data.accounts);
     const insitutionID = res.data.item.institution_id;
     const request = {
       institution_id: insitutionID,
@@ -112,7 +111,7 @@ const plaid = {
 
     const { data: inst_data } = await plaidClient.institutionsGetById(request);
     const { institution } = inst_data;
-    console.log("accounts --->", { ...res.data, institution });
+
     return { ...res.data, institution };
   },
 };
