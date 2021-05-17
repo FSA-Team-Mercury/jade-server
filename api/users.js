@@ -3,32 +3,74 @@ const { Game,User, Friend, Badge } = require("../db");
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjIxMDg4ODE5fQ.IQu5ya4QxIjZ1EMkHxeVJRkfxo5gI2M6Kjm4Ahsq4V8"
 const { Op } = require("sequelize");
 
+router.get('/old', async (req,res,next)=>{
+  // const user = await User.findByToken(token)//context.authorization);
+    // const {search} = args
+    let search = 'd'
+    const user = await User.findByToken(token)//context.authorization);
+    const users = await User.findAll({
+      where:{
+        username: {
+          [Op.like]: `%${search}%`
+          }
+      },
+      attributes:['id', 'username', 'profileImage']
+    })
+    res.send(users)
+})
+
 router.get('/testing', async(req,res,next)=>{
      const user = await User.findByToken(token)//context.authorization);
-      const userData =  await User.findAll({
+     console.log(user.id)
+      let userData =  await User.findAll({
       where:{
         id: user.id,
       },
-      attributes: ['id', 'username'],
+      attributes: ['id', 'username', 'profileImage'],
       include: [
         {
-          attributes: ['id', 'username'],
-          model: User, as:  'userFriends',
-          through: {
-            where: {
-                userId: user.id,
-                accepted: true
-              },
-            attributes: ['accepted', 'friendshipDate','createdAt'],
-            },
-          include: {
+        model: User, as:  'friend',
+        attributes: ['id', 'username', 'profileImage'],
+         through:{
+          // attributes:[]
+         attributes: ['accepted', 'friendshipDate', 'userId', 'friendId'],
+          where:{
+            accepted: true
+          }
+        },
+        include: {
             model: Badge,
-            attributes: ['type', 'imageUrl','createdAt'],
+            attributes: ['type', 'imageUrl', 'createdAt'],
           },
-        }
-      ],
-
+      },
+      {
+        model: User, as:  'userFriends',
+        attributes: ['id', 'username', 'profileImage',],
+        through:{
+          attributes: ['accepted', 'friendshipDate', 'userId', 'friendId'],
+          where:{
+            accepted: true
+          }
+        },
+        include: {
+            model: Badge,
+            attributes: ['type', 'imageUrl', 'createdAt'],
+          },
+      }
+      ]
     });
+    userData = userData[0]
+    let mutualFriends = userData.friend
+    mutualFriends = mutualFriends.concat(userData.userFriends)
+    res.send(mutualFriends)
+    let data = {
+      id: userData.id,
+      username: userData.username,
+      profileImage: userData.profileImage,
+      mutualFriends
+    }
+    res.send(data)
+    // res.send(userData)
     const userFriends = userData[0].userFriends
     res.send(userFriends)
 })
@@ -44,21 +86,20 @@ router.get('/mfriends', async(req,res,next)=>{
           where:{
               id: friendId
             },
-          attributes: ['id', 'username'],
+          attributes: ['id', 'username',],
           include: [
             {
-              attributes: ['id', 'username'],
+              attributes: ['id', 'username', 'profileImage'],
               model: User, as:  'userFriends',
-              through: {
-                  // looks to see in friends table if they have a friend that the curent user is not following
-
-                attributes: ['accepted', 'userId'],
+                include: {
+                  model: User, as:  'friend',
+                  attributes: ['id', 'username', 'profileImage'],
                 }
+
             }
           ],
 
         });
-        console.log('users-->', users)
         if (users[0]){
           return users[0].userFriends
         }
@@ -86,7 +127,7 @@ router.get('/mfriends', async(req,res,next)=>{
       // return potentialFriends // these are the pennding friends
       res.send(potentialFriends)
     }catch(err){
-      console.log('error in friends\n', err)
+      console.log('error in friends api\n', err)
     }
 })
 module.exports = router;

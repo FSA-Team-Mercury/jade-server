@@ -53,7 +53,7 @@ router.post("/link/token/create", async (req, res, next) => {
   try {
     const { data } = await plaidClient.linkTokenCreate(request);
     console.log(data);
-    ocnsole.log('_________\n\nhere\n\n____')
+    // ocnsole.log('_________\n\nhere\n\n____')
     res.send(data);
   } catch (error) {
     // handle error

@@ -17,7 +17,7 @@ const FriendType = new GraphQLObjectType({
   fields: () => ({
     id: {type: GraphQLInt},
     username: {type: GraphQLString},
-    friendId: {type: GraphQLInt},
+    friendId: {type: GraphQLID},
     search: {type: GraphQLString}
   })
 });
@@ -28,6 +28,7 @@ const FindFriendsType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLInt }, // maybe should be id
     username: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     friends: { type: SingleFriendTableType },
     badges: {type: GraphQLList(FriendBadgeType)}
   })
@@ -38,6 +39,8 @@ const SingleFriendTableType = new GraphQLObjectType({
   fields: () => ({
     accepted: {type: GraphQLBoolean},
     friendshipDate: {type: GraphQLString},
+    userId: {type: GraphQLID},
+    friendId: {type: GraphQLID}
   })
 });
 
@@ -72,15 +75,13 @@ const SearchingUsersType = new GraphQLObjectType({
 
 
 // Queries
-
 // friends that have accepted your request
 const friends = {
   type: new GraphQLList(FindFriendsType),
   async resolve(parent, args, context) {
     try{
-      const user = await User.findByToken(token)//context.authorization);
-      const userFriends = await User.findFriends(user)
-      console.log('friends-->\n', userFriends)
+      const user = await User.findByToken(token)//context.authorization)//token);
+      const userFriends = await User.findFriends(user.id,true) // find where accepted is true
       return userFriends
 
     }catch(err){
@@ -95,28 +96,8 @@ const pendingFriends = {
   async resolve(parent, args, context) {
     try{
       const user = await User.findByToken(token)//context.authorization);
-      const userData =  await User.findAll({
-          where:{
-            id: user.id,
-          },
-          attributes: ['id', 'username'],
-          include: [
-            {
-              attributes: ['id', 'username'],
-              model: User, as:  'userFriends',
-              through: {
-                where: {
-                    userId: user.id,
-                    accepted: false
-                  },
-                attributes: ['accepted'],
-                }
-            }
-          ],
-
-        });
-        console.log(userData[0].userFriends)
-        return userData[0].userFriends // these are the pennding friends
+      const pending = await User.findFriends(user.id,false) // find where accepted is false
+      return pending
 
     }catch(err){
       console.log('error in friends\n', err)
@@ -145,70 +126,86 @@ const IntFriendType = new GraphQLObjectType({
     id: {type: GraphQLID}
   })
 })
-const mutualFriends = {
-  type: new GraphQLList(MutualFriendsType),
-  args:{
-    friends: {type: GraphQLList(IntFriendType)}
-  },
-  async resolve(parent, args, context) {
-    try{
-      friends = [1,2,3,4,5]
-      const user = await User.findByToken(token)//context.authorization);
-      const {friends} = args
+// const mutualFriends = {
+//   type: new GraphQLList(MutualFriendsType),
+//   args:{
+//     friends: {type: GraphQLList(IntFriendType)}
+//   },
+//   async resolve(parent, args, context) {
+//     try{
+//       friends = [1,2,3,4,5]
+//       const user = await User.findByToken(token)//context.authorization);
+//       const {friends} = args
 
-      async function getMutualFriends(friendId){
-        return await User.findAll({
-          // looks for an id of a friend
-          where:{
-              id: friendId
-            },
-          attributes: ['id', 'username'],
-          include: [
-            {
-              attributes: ['id', 'username'],
-              model: User, as:  'userFriends',
-              through: {
-                  // looks to see in friends table if they have a friend that the curent user is not following
-                where: {
-                    userId: friendId,
-                    accepted: false // means user is not already following them
-                  },
-                attributes: ['accepted', 'userId'],
-                }
-            }
-          ],
+//       async function getMutualFriends(friendId){
+//         return await User.findAll({
+//           // looks for an id of a friend
+//           where:{
+//               id: friendId
+//             },
+//           attributes: ['id', 'username'],
+//           include: [
+//             {
+//               attributes: ['id', 'username'],
+//               model: User, as:  'userFriends',
+//               through: {
+//                   // looks to see in friends table if they have a friend that the curent user is not following
+//                 where: {
+//                     userId: friendId,
+//                     accepted: false // means user is not already following them
+//                   },
+//                 attributes: ['accepted', 'userId'],
+//                 }
+//             }
+//           ],
 
-        })[0].userFriends;
-      }
-      let mutualFriendsData = {}
+//         })[0].userFriends;
+//       }
+//       let mutualFriendsData = {}
 
-      for (let i=0;i<friends.length;i++){
-        let friendId = friends[i]
-        const mutualFriends = getMutualFriends(friendId)
-        mutualFriendsData[friendId] = mutualFriends
+//       for (let i=0;i<friends.length;i++){
+//         let friendId = friends[i]
+//         const mutualFriends = getMutualFriends(friendId)
+//         mutualFriendsData[friendId] = mutualFriends
 
-      }
-      let count = 0
-      const potentialFriends = Object.keys(mutualFriendsData).filter((accum,key)=> {
-        let user = mutualFriendsData[key]
-        if (count > 20){ // to many people
-          return accum
-        }
-        count += 1
-        accum.push(user)
-        return accum
-      },[])
-      return potentialFriends // these are the pennding friends
+//       }
+//       let count = 0
+//       const potentialFriends = Object.keys(mutualFriendsData).filter((accum,key)=> {
+//         let user = mutualFriendsData[key]
+//         if (count > 20){ // to many people
+//           return accum
+//         }
+//         count += 1
+//         accum.push(user)
+//         return accum
+//       },[])
+//       return potentialFriends // these are the pennding friends
 
-    }catch(err){
-      console.log('error in friends\n', err)
-    }
-  },
-};
+//     }catch(err){
+//       console.log('error in friends\n', err)
+//     }
+//   },
+// };
 
-// search users in db
+const FriendSearchType = new GraphQLObjectType({
+  name: "FriendSearchType",
+  fields: () => ({
+    result: {type: GraphQLList(SingleSearchType)},
+    search: {type: GraphQLString}
+  })
+});
+
+const SingleSearchType = new GraphQLObjectType({
+  name: 'SingleSearchType',
+  fields:()=>({
+    id: {type: GraphQLID},
+    username:{type: GraphQLString},
+    profileImage: {type: GraphQLString}
+  })
+})
+
 const searchUsers = {
-  type: FriendType,
+  type: FriendSearchType,
   args: {
     search: {type: GraphQLString}
   },
@@ -216,14 +213,17 @@ const searchUsers = {
     try{
       const {search} = args
       const user = await User.findByToken(token)//context.authorization);
-      const users = await User.findAll({
+       const users = await User.findAll({
         where:{
           username: {
             [Op.like]: `%${search}%`
             }
-        }
+        },
+        attributes:['id', 'username', 'profileImage']
       })
-      return users[0]
+      return {
+        result: users
+      }
     }catch(err){
       console.log('error in friends\n', err)
       throw new Error('Error Searching users', error)
@@ -238,11 +238,10 @@ const searchUsers = {
 const addFriend = {
   type: FriendType,
   args: {
-    friendId: { type: GraphQLInt },
+    friendId: { type: GraphQLID },
   },
   async resolve(parent, args, context) {
     try {
-      console.log('here')
       const {friendId} = args
       const user = await User.findByToken(token)//context.authorization);
       const newFriend = await User.findOne({
@@ -269,7 +268,7 @@ const addFriend = {
 const acceptFriendReq = {
   type: FriendType,
   args:{
-    friendId: {type: GraphQLInt}
+    friendId: {type: GraphQLID}
   },
   async resolve(parent,args,context){
     try {
@@ -301,19 +300,31 @@ const acceptFriendReq = {
 const unfollowUser = {
   type: FriendType,
   args: {
-    friendId: {type: GraphQLInt}
+    friendId: {type: GraphQLID}
   },
   async resolve(parent, args, context) {
     try{
       const {friendId} = args
-      const user = await User.findByToken(token)//context.authorization);
-      await Friend.destroy({
+      const user = await User.findByToken(context.authorization);
+      const caseOne = await Friend.findOne({
         where:{
           friendId,
           userId: user.id
         }
       })
+      // await unfollowingUser.destroy()
 
+      const caseTwo = await Friend.findOne({
+        where:{
+          userId: friendId,
+          friendId: user.id
+        }
+      })
+      if (caseOne){
+        await caseOne.destroy()
+      }else{
+        await caseTwo.destroy
+      }
       return {
         id: user.Id,
         friendId
@@ -324,7 +335,7 @@ const unfollowUser = {
     }
   },
 };
-
+console.log('in here')
 
 // RETURN
 module.exports = {

@@ -22,7 +22,7 @@ const RootQuery = new GraphQLObjectType({
     ...user_queries,
     ...saving_queries,
     ...plaid_queries,
-    // ...friend_queries
+    ...friend_queries
   },
 });
 
@@ -37,7 +37,7 @@ const Mutation = new GraphQLObjectType({
     ...user_mutations,
     ...saving_mutations,
     ...plaid_mutations,
-    // ...friend_mutations
+    ...friend_mutations
   },
 });
 

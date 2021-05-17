@@ -24,12 +24,6 @@ Challenge.belongsTo(User);
 User.hasMany(Challenge);
 
 // assosations -->>
-/*
-User --has many friends ---> Friend
-User -- can be friends of many users --> Friend
-
-
-*/
 
 // set friends
 User.belongsToMany(User, { as: "userFriends", through: Friend,foreignKey: "userId", });
@@ -53,32 +47,52 @@ module.exports = {
   Friend
 };
 
-User.findFriends = async (user)=>{
-  const userData =  await User.findAll({
+User.findFriends = async (id, accepted)=>{
+  let userData =  await User.findAll({
       where:{
-        id: user.id,
+        id,
       },
-      attributes: ['id', 'username'],
+      attributes: ['id', 'username', 'profileImage'],
       include: [
         {
-          attributes: ['id', 'username'],
-          model: User, as:  'userFriends',
-          through: {
-            where: {
-                userId: user.id,
-                accepted: true
-              },
-            attributes: ['accepted', 'friendshipDate'],
-            },
-          include: {
+        model: User, as:  'friend',
+        attributes: ['id', 'username', 'profileImage'],
+         through:{
+         attributes: ['accepted', 'friendshipDate', 'userId', 'friendId'],
+          where:{
+            accepted
+          }
+        },
+        include: {
             model: Badge,
             attributes: ['type', 'imageUrl', 'createdAt'],
           },
-        }
-      ],
-
+      },
+      {
+        model: User, as:  'userFriends',
+        attributes: ['id', 'username', 'profileImage',],
+        through:{
+          attributes: ['accepted', 'friendshipDate', 'userId', 'friendId'],
+          where:{
+            accepted
+          }
+        },
+        include: {
+            model: Badge,
+            attributes: ['type', 'imageUrl', 'createdAt'],
+          },
+      }
+      ]
     });
-    // console.log('findFriends-->', userData)
-  return userData[0].userFriends
+  let existingUser = []
+  userData = userData[0]
+  let users = userData.friend
+  users = users.concat(userData.userFriends)
+  users = users.filter(user=>{
+    let existing = existingUser.includes(user.id)
+    existingUser.push(user.id)
+    return !existing
+  })
+  return users
 }
 
