@@ -99,6 +99,7 @@ const logIn = {
       username: args.username,
       password: args.password,
     });
+    console.log('token-->', token)
     return { token };
   },
 };

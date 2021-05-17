@@ -100,7 +100,6 @@ const plaid = {
       start_date: beginnignOfMonth,
       end_date: now,
     });
-
     const insitutionID = res.data.item.institution_id;
     const request = {
       institution_id: insitutionID,
@@ -109,11 +108,10 @@ const plaid = {
         include_optional_metadata: true,
       },
     };
-
     const { data: inst_data } = await plaidClient.institutionsGetById(request);
     const { institution } = inst_data;
-    console.log("accounts --->", { ...res.data, institution });
     return { ...res.data, institution };
+
   },
 };
 
