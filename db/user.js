@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 // const { Badge } = require("./index");
 const Badge = require("./badge");
-const dbIndex = require("./index");
 require("dotenv").config();
 
 const SALT_ROUNDS = 5;
@@ -38,6 +37,10 @@ const User = db.define("user", {
     allowNull: true,
     defaultValue:
       defaultImages[Math.floor(Math.random() * (defaultImages.length - 1))],
+  },
+  notification_token: {
+    type: Sequelize.TEXT,
+    allowNull: true,
   },
 });
 
@@ -87,7 +90,7 @@ User.findByToken = async function (token) {
 /**
  * hooks
  */
-const hashPassword = async user => {
+const hashPassword = async (user) => {
   //in case the password has been changed, we want to encrypt it with bcrypt
   if (user.password.length < 4) {
     const error = Error("Password must be at least 4 letters");
@@ -104,22 +107,22 @@ const hashPassword = async user => {
   }
 };
 
-
-function getEagerLoading(firendType, accepted,Badge){
+function getEagerLoading(firendType, accepted, Badge) {
   return {
-        model: User, as:  firendType,
-        attributes: ['id', 'username', 'profileImage'],
-         through:{
-         attributes: ['accepted', 'friendshipDate', 'userId', 'friendId'],
-          where:{
-            accepted
-          }
-        },
-        include: {
-            model: Badge,
-            attributes: ['type', 'imageUrl', 'createdAt'],
-          },
-      }
+    model: User,
+    as: firendType,
+    attributes: ["id", "username", "profileImage"],
+    through: {
+      attributes: ["accepted", "friendshipDate", "userId", "friendId"],
+      where: {
+        accepted,
+      },
+    },
+    include: {
+      model: Badge,
+      attributes: ["type", "imageUrl", "createdAt"],
+    },
+  };
 }
 
 User.findFriends = async (id, accepted) => {
@@ -129,8 +132,8 @@ User.findFriends = async (id, accepted) => {
     },
     attributes: ["id", "username", "profileImage"],
     include: [
-      getEagerLoading("friendsByRequest", accepted,Badge),
-      getEagerLoading("friendsByInquire", accepted,Badge),
+      getEagerLoading("friendsByRequest", accepted, Badge),
+      getEagerLoading("friendsByInquire", accepted, Badge),
     ],
   });
 
@@ -138,7 +141,7 @@ User.findFriends = async (id, accepted) => {
   userData = userData[0];
   let users = userData.friendsByInquire;
   users = users.concat(userData.friendsByRequest);
-  users = users.filter(user => {
+  users = users.filter((user) => {
     let existing = existingUser.includes(user.id);
     existingUser.push(user.id);
     return !existing;
@@ -148,6 +151,6 @@ User.findFriends = async (id, accepted) => {
 
 User.beforeCreate(hashPassword);
 User.beforeUpdate(hashPassword);
-User.beforeBulkCreate(users => {
+User.beforeBulkCreate((users) => {
   users.forEach(hashPassword);
 });

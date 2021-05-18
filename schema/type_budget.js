@@ -66,13 +66,13 @@ const addBudget = {
     const user = await User.findByToken(context.authorization);
     const existingBudget = await Budget.findAll({
       where: {
-        userId : user.id,
+        userId: user.id,
         category: args.category,
-        isCompleted: false
-      }
-    })
-    if(existingBudget.length){
-      throw new Error('Budget already exists')
+        isCompleted: false,
+      },
+    });
+    if (existingBudget.length) {
+      throw new Error("Budget already exists");
     }
 
     const budget = await Budget.create({
@@ -110,7 +110,6 @@ const deleteBudget = {
     id: { type: GraphQLID },
   },
   async resolve(parent, args, context) {
-    console.log("auth -->", context.authorization);
     const user = await User.findByToken(context.authorization);
     const budget = await Budget.findOne({
       where: {
