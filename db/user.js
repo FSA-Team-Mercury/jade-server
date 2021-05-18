@@ -146,6 +146,7 @@ User.findFriends = async (id, accepted) => {
   return users;
 };
 
+
 User.beforeCreate(hashPassword);
 User.beforeUpdate(hashPassword);
 User.beforeBulkCreate(users => {

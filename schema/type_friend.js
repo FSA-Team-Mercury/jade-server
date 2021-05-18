@@ -130,11 +130,19 @@ const FriendSearchType = new GraphQLObjectType({
   name: "FriendSearchType",
   fields: () => ({
     result: { type: GraphQLList(SingleSearchType) },
+    // relationship: {type: GraphQLList(FriendRealtionshipType)},
     pendingFriends: {type: GraphQLList(SingleSearchType)},
     friends: {type: GraphQLList(SingleSearchType)},
     search: { type: GraphQLString },
   }),
 });
+
+// const FriendRealtionshipType = new GraphQLObjectType({
+//   name: 'FriendRealtionshipType',
+//   fields:()=>({
+//     []: {type: GraphQLString}
+//   })
+// })
 
 const SingleSearchType = new GraphQLObjectType({
   name: "SingleSearchType",
@@ -143,7 +151,8 @@ const SingleSearchType = new GraphQLObjectType({
     username: { type: GraphQLString },
     profileImage: { type: GraphQLString },
     profileImage: { type: GraphQLString },
-    friends: {type: GraphQLList(SingleSearchFriendsType)}
+    friends: {type: GraphQLList(SingleSearchFriendsType)},
+    relationship: {type: GraphQLString}
   }),
 });
 
@@ -178,10 +187,27 @@ const searchUsers = {
 
       const friends = await User.findFriends(user.id, true)
       const pendingFriends = await User.findFriends(user.id, false)
+      const relationship = {} //"PENDING" || "FRIENDS" || "NOT FRIENDS"
+      friends.forEach(user=>{
+        relationship[user.id] = 'FRIENDS'
+      })
+
+      pendingFriends.forEach(user=>{
+        relationship[user.id] = 'PENDING'
+      })
+
+      friends.forEach(user=>{
+        if (String(user.id) in relationship){
+          user.relationship = relationship[user.id]
+        }else{
+          user.relationship = 'NOT_FRIENDS'
+        }
+      })
+
+      console.log('friends-->',friends)
+
       return {
         result: users,
-        pendingFriends,
-        friends
       };
     } catch (err) {
       console.log("error in friends\n", err);
