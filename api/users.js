@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const { Game,User, Friend, Badge } = require("../db");
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjIxMDg4ODE5fQ.IQu5ya4QxIjZ1EMkHxeVJRkfxo5gI2M6Kjm4Ahsq4V8"
 const { Op } = require("sequelize");
 
 router.get('/old', async (req,res,next)=>{
