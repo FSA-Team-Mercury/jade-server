@@ -14,7 +14,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use("/plaid", require("./plaid"));
-app.use("/api/users", require("./users"));
 
 app.use(
   "/graphql",
