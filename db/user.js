@@ -2,10 +2,16 @@ const Sequelize = require("sequelize");
 const db = require("./database");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+// const { Badge } = require("./index");
+const Badge = require("./badge");
 require("dotenv").config();
 
 const SALT_ROUNDS = 5;
-
+const defaultImages = [
+  "icons8-rihanna-96.png",
+  "icons8-ozil-96.png",
+  "icons8-salah-96.png",
+];
 const User = db.define("user", {
   username: {
     type: Sequelize.STRING,
@@ -29,6 +35,8 @@ const User = db.define("user", {
   profileImage: {
     type: Sequelize.TEXT,
     allowNull: true,
+    defaultValue:
+      defaultImages[Math.floor(Math.random() * (defaultImages.length - 1))],
   },
   notification_token: {
     type: Sequelize.TEXT,
@@ -97,6 +105,48 @@ const hashPassword = async (user) => {
   if (user.changed("password")) {
     user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
   }
+};
+
+function getEagerLoading(firendType, accepted, Badge) {
+  return {
+    model: User,
+    as: firendType,
+    attributes: ["id", "username", "profileImage"],
+    through: {
+      attributes: ["accepted", "friendshipDate", "userId", "friendId"],
+      where: {
+        accepted,
+      },
+    },
+    include: {
+      model: Badge,
+      attributes: ["type", "imageUrl", "createdAt"],
+    },
+  };
+}
+
+User.findFriends = async (id, accepted) => {
+  let userData = await User.findAll({
+    where: {
+      id,
+    },
+    attributes: ["id", "username", "profileImage"],
+    include: [
+      getEagerLoading("friendsByRequest", accepted, Badge),
+      getEagerLoading("friendsByInquire", accepted, Badge),
+    ],
+  });
+
+  let existingUser = [];
+  userData = userData[0];
+  let users = userData.friendsByInquire;
+  users = users.concat(userData.friendsByRequest);
+  users = users.filter((user) => {
+    let existing = existingUser.includes(user.id);
+    existingUser.push(user.id);
+    return !existing;
+  });
+  return users;
 };
 
 User.beforeCreate(hashPassword);

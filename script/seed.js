@@ -8,8 +8,30 @@ const {
   Challenge,
   Budget,
   Saving,
-  Friend
+  Friend,
 } = require("../db");
+
+async function acceptFriendReq(user, newFriend){
+    try {
+      const acceptedFriends = await Friend.update(
+      {
+        accepted: true,
+        friendshipDate: JSON.stringify(new Date()),
+        },
+      {
+        where: {
+        userId: newFriend.id,
+        friendId: user.id,
+        }
+      })
+      if (!acceptedFriends[0]){
+        throw new Error('new friend did not request a friendship')
+      }
+      
+    } catch (error) {
+      console.log('ERROR ACCEPTING FRIEnD', error)
+    }
+  }
 
 async function seed() {
   await db.sync({ force: true }); // clears db and matches models to tables
@@ -23,6 +45,20 @@ async function seed() {
     }),
     User.create({
       username: "murphy",
+      password: "12345",
+    }),
+    User.create({
+      username: "geza",
+      password: "12345",
+    }),
+    User.create({
+      username: "alan",
+      password: "12345",
+    }),User.create({
+      username: "d-ice",
+      password: "12345",
+    }),User.create({
+      username: "dylan",
       password: "12345",
     }),
   ]);
@@ -51,6 +87,10 @@ async function seed() {
 
   await challenges[0].setUser(users[1]);
   await challenges[0].setUser(users[0]);
+  await challenges[1].setUser(users[2]);
+  await challenges[0].setUser(users[3]);
+  await challenges[0].setUser(users[4]);
+  await challenges[1].setUser(users[5]);
 
   const badges = await Promise.all([
     Badge.create({
@@ -75,6 +115,12 @@ async function seed() {
   await badges[2].setUser(users[1]);
   await badges[3].setUser(users[1]);
   await badges[4].setUser(users[0]);
+
+
+  await badges[1].setUser(users[2]);
+  await badges[2].setUser(users[3]);
+  await badges[3].setUser(users[4]);
+  await badges[4].setUser(users[5]);
 
   const budgets = await Promise.all([
     Budget.create({
@@ -113,8 +159,7 @@ async function seed() {
       currentAmount: 7000,
     }),
   ]);
-  // console.log('user 1-->', users[0])
-  await users[0].setFriend(users[1])
+
 
   await budgets[0].setUser(users[0]);
   await budgets[1].setUser(users[0]);
@@ -123,6 +168,29 @@ async function seed() {
   await budgets[4].setUser(users[0]);
   await budgets[5].setUser(users[1]);
   await budgets[6].setUser(users[0]);
+
+
+  await budgets[1].setUser(users[3]);
+  await budgets[2].setUser(users[4]);
+  await budgets[3].setUser(users[5]);
+
+  // console.log(users[0].__proto__)
+  await users[0].addFriendsByRequest(users[1]);
+  await acceptFriendReq(users[1], users[0])
+
+  await users[0].addFriendsByRequest(users[2]);
+  await acceptFriendReq(users[2], users[0])
+
+  await users[0].addFriendsByRequest(users[3]);
+  await acceptFriendReq(users[3], users[0])
+
+  await users[2].addFriendsByRequest(users[3]);
+  await acceptFriendReq(users[3], users[2])
+
+  await users[4].addFriendsByRequest(users[5]);
+  await acceptFriendReq(users[5], users[4])
+
+
 
   const savings = await Promise.all([
     Saving.create({
