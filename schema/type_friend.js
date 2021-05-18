@@ -79,12 +79,7 @@ const friends = {
   type: new GraphQLList(FindFriendsType),
   async resolve(parent, args, context) {
     try {
-      // const user = await User.findByToken(token); //context.authorization)//token);
-      const user = await User.findOne({
-        where:{
-          id: 5
-        }
-      })
+      const user = await User.findByToken(context.authorization)
       const userFriends = await User.findFriends(user.id, true); // find where accepted is true
       return userFriends;
     } catch (err) {
@@ -98,7 +93,7 @@ const pendingFriends = {
   type: new GraphQLList(FindPendingFriendsType),
   async resolve(parent, args, context) {
     try {
-      const user = await User.findByToken(token); //context.authorization);
+      const user = await User.findByToken(context.authorization);
       const pending = await User.findFriends(user.id, false); // find where accepted is false
       return pending;
     } catch (err) {
@@ -176,7 +171,7 @@ const searchUsers = {
     try {
       const { search } = args;
       const user = await User.findByToken(context.authorization);
-      const users = await User.findAll({
+      const searchResult = await User.findAll({
         where: {
           username: {
             [Op.like]: `%${search}%`,
@@ -197,17 +192,19 @@ const searchUsers = {
       })
 
       friends.forEach(user=>{
-        if (String(user.id) in relationship){
-          user.relationship = relationship[user.id]
+        relationship[user.id] = 'FRIENDS'
+      })
+
+      searchResult.forEach((user, index)=>{
+        if ((user.id) in relationship){
+          searchResult[index].relationship = relationship[user.id]
         }else{
-          user.relationship = 'NOT_FRIENDS'
+          searchResult[index].relationship = 'NOT_FRIENDS'
         }
       })
 
-      console.log('friends-->',friends)
-
       return {
-        result: users,
+        result: searchResult,
       };
     } catch (err) {
       console.log("error in friends\n", err);
@@ -227,7 +224,7 @@ const addFriend = {
   async resolve(parent, args, context) {
     try {
       const { friendId } = args;
-      const user = await User.findByToken(context.authorization); //token)//context.authorization);
+      const user = await User.findByToken(context.authorization);
       const newFriend = await User.findOne({
         where: {
           id: friendId,
@@ -258,7 +255,7 @@ const acceptFriendReq = {
     try {
       const { friendId } = args;
       const date = JSON.stringify(new Date());
-      const user = await User.findByToken(context.authorization); //murphyToken)//);
+      const user = await User.findByToken(context.authorization);
 
       const newFriend = await Friend.findOne({
         where: {
