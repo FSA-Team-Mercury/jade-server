@@ -16,22 +16,6 @@ const configuration = new Configuration({
 
 const plaidClient = new PlaidApi(configuration);
 
-// GET plaid/catagories
-router.get("/categories", async (req, res, next) => {
-  // res.send("here");
-  const response = await plaidClient.getCategories(params => {
-    console.log("props-->", props);
-  });
-  const categories = response.categories;
-  res.send(categories);
-});
-
-// GET plaid/testing
-router.get("/testing", (req, res, next) => {
-  console.log("in router");
-  res.send("works");
-});
-
 // POST /plaid/links/token/create
 router.post("/link/token/create", async (req, res, next) => {
   const client_user_id = req.body.client_user_id;
@@ -52,8 +36,6 @@ router.post("/link/token/create", async (req, res, next) => {
   };
   try {
     const { data } = await plaidClient.linkTokenCreate(request);
-    console.log(data);
-    // ocnsole.log('_________\n\nhere\n\n____')
     res.send(data);
   } catch (error) {
     // handle error
@@ -61,34 +43,4 @@ router.post("/link/token/create", async (req, res, next) => {
   }
 });
 
-// GET /plaid/get_access_token // second part of auth
-router.post("/get_access_token", async function (req, res, next) {
-  const publicToken = req.body.public_token;
-  try {
-    const { data } = await plaidClient.itemPublicTokenExchange({
-      public_token: publicToken,
-    });
-    const accessToken = data.access_token;
-    res.send(accessToken);
-  } catch (error) {
-    // handle error
-    next(error);
-  }
-});
-
-// GET /plaid/transactions // last part
-router.post("/transactions", async (req, res, next) => {
-  try {
-    const access_token = req.body.access_token;
-    const { data } = await plaidClient.transactionsGet({
-      access_token,
-      start_date: "2021-03-01",
-      end_date: "2021-05-01",
-    });
-
-    res.json(data.transactions);
-  } catch (error) {
-    next(error);
-  }
-});
 module.exports = router;
