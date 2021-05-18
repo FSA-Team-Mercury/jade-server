@@ -95,15 +95,19 @@ async function seed() {
   const badges = await Promise.all([
     Badge.create({
       type: "big-saver",
+      badgeImage: "rainbow",
     }),
     Badge.create({
       type: "traveler",
+      badgeImage: "earth",
     }),
     Badge.create({
       type: "hermit",
+      badgeImage: "thunder",
     }),
     Badge.create({
       type: "smart-shopper",
+      badgeImage: "cascade",
     }),
     Badge.create({
       type: "big-spender",
