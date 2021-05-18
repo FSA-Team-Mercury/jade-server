@@ -26,6 +26,14 @@ const User = db.define("user", {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  profileImage: {
+    type: Sequelize.TEXT,
+    allowNull: true,
+  },
+  notification_token: {
+    type: Sequelize.TEXT,
+    allowNull: true,
+  },
 });
 
 module.exports = User;

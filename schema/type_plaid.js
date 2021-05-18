@@ -10,7 +10,6 @@ const {
   GraphQLList,
   GraphQLFloat,
   GraphQLBoolean,
-  GraphQLScalarType,
 } = require("graphql");
 
 const configuration = new Configuration({
@@ -47,6 +46,7 @@ const AccountType = new GraphQLObjectType({
   fields: () => ({
     account_id: { type: GraphQLString },
     type: { type: GraphQLString },
+    mask: { type: GraphQLString },
     subtype: { type: GraphQLString },
     name: { type: GraphQLString },
     balances: { type: BalancesType },
@@ -57,6 +57,7 @@ const TransactionTye = new GraphQLObjectType({
   name: "PlaidTransaction",
   fields: () => ({
     account_id: { type: GraphQLID },
+    transaction_id: { type: GraphQLID },
     amount: { type: GraphQLFloat },
     category: { type: GraphQLList(GraphQLString) },
     date: { type: GraphQLString },
@@ -90,16 +91,16 @@ const plaid = {
 
     const accts = await user.getAccounts();
     // retrieve data from beginning of month until the day of request
-    const beginnignOfMonth = moment(new Date())
-      .startOf("month")
+    const beginnignOfYear = moment(new Date())
+      .startOf("year")
       .format("YYYY-MM-DD");
     const now = moment(new Date()).format("YYYY-MM-DD");
+
     const res = await plaidClient.transactionsGet({
       access_token: accts[0].auth_token,
-      start_date: beginnignOfMonth,
+      start_date: beginnignOfYear,
       end_date: now,
     });
-    console.log(res.data.accounts);
     const insitutionID = res.data.item.institution_id;
     const request = {
       institution_id: insitutionID,
@@ -108,10 +109,8 @@ const plaid = {
         include_optional_metadata: true,
       },
     };
-
     const { data: inst_data } = await plaidClient.institutionsGetById(request);
     const { institution } = inst_data;
-
     return { ...res.data, institution };
   },
 };
