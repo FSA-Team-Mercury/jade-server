@@ -2,10 +2,17 @@ const Sequelize = require("sequelize");
 const db = require("./database");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+// const { Badge } = require("./index");
+const Badge = require("./badge");
+const dbIndex = require("./index");
 require("dotenv").config();
 
 const SALT_ROUNDS = 5;
-
+const defaultImages = [
+  "icons8-rihanna-96.png",
+  "icons8-ozil-96.png",
+  "icons8-salah-96.png",
+];
 const User = db.define("user", {
   username: {
     type: Sequelize.STRING,
@@ -26,10 +33,12 @@ const User = db.define("user", {
     type: Sequelize.STRING,
     allowNull: false,
   },
-  profileImage:{
+  profileImage: {
     type: Sequelize.TEXT,
-    allowNull: true
-  }
+    allowNull: true,
+    defaultValue:
+      defaultImages[Math.floor(Math.random() * (defaultImages.length - 1))],
+  },
 });
 
 module.exports = User;
@@ -78,7 +87,7 @@ User.findByToken = async function (token) {
 /**
  * hooks
  */
-const hashPassword = async (user) => {
+const hashPassword = async user => {
   //in case the password has been changed, we want to encrypt it with bcrypt
   if (user.password.length < 4) {
     const error = Error("Password must be at least 4 letters");
@@ -96,8 +105,49 @@ const hashPassword = async (user) => {
 };
 
 
+function getEagerLoading(firendType, accepted,Badge){
+  return {
+        model: User, as:  firendType,
+        attributes: ['id', 'username', 'profileImage'],
+         through:{
+         attributes: ['accepted', 'friendshipDate', 'userId', 'friendId'],
+          where:{
+            accepted
+          }
+        },
+        include: {
+            model: Badge,
+            attributes: ['type', 'imageUrl', 'createdAt'],
+          },
+      }
+}
+
+User.findFriends = async (id, accepted) => {
+  let userData = await User.findAll({
+    where: {
+      id,
+    },
+    attributes: ["id", "username", "profileImage"],
+    include: [
+      getEagerLoading("friendsByRequest", accepted,Badge),
+      getEagerLoading("friendsByInquire", accepted,Badge),
+    ],
+  });
+
+  let existingUser = [];
+  userData = userData[0];
+  let users = userData.friendsByInquire;
+  users = users.concat(userData.friendsByRequest);
+  users = users.filter(user => {
+    let existing = existingUser.includes(user.id);
+    existingUser.push(user.id);
+    return !existing;
+  });
+  return users;
+};
+
 User.beforeCreate(hashPassword);
 User.beforeUpdate(hashPassword);
-User.beforeBulkCreate((users) => {
+User.beforeBulkCreate(users => {
   users.forEach(hashPassword);
 });
