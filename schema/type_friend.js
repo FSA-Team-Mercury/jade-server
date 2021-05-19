@@ -60,7 +60,8 @@ const FindPendingFriendsType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLInt }, // maybe should be id
     username: { type: GraphQLString },
-    friends: { type: SingleFriendTableType },
+    profileImage: { type: GraphQLString },
+    // friends: { type: GraphQLList(SingleFriendTableType) },
   }),
 });
 
@@ -79,7 +80,7 @@ const friends = {
   type: new GraphQLList(FindFriendsType),
   async resolve(parent, args, context) {
     try {
-      const user = await User.findByToken(context.authorization)
+      const user = await User.findByToken(context.authorization);
       const userFriends = await User.findFriends(user.id, true); // find where accepted is true
       return userFriends;
     } catch (err) {
@@ -94,7 +95,7 @@ const pendingFriends = {
   async resolve(parent, args, context) {
     try {
       const user = await User.findByToken(context.authorization);
-      const pending = await User.findFriends(user.id, false); // find where accepted is false
+      let pending = await User.findFriends(user.id, false); // find where accepted is false
       return pending;
     } catch (err) {
       console.log("error in friends\n", err);
@@ -126,8 +127,8 @@ const FriendSearchType = new GraphQLObjectType({
   fields: () => ({
     result: { type: GraphQLList(SingleSearchType) },
     // relationship: {type: GraphQLList(FriendRealtionshipType)},
-    pendingFriends: {type: GraphQLList(SingleSearchType)},
-    friends: {type: GraphQLList(SingleSearchType)},
+    pendingFriends: { type: GraphQLList(SingleSearchType) },
+    friends: { type: GraphQLList(SingleSearchType) },
     search: { type: GraphQLString },
   }),
 });
@@ -146,21 +147,18 @@ const SingleSearchType = new GraphQLObjectType({
     username: { type: GraphQLString },
     profileImage: { type: GraphQLString },
     profileImage: { type: GraphQLString },
-    friends: {type: GraphQLList(SingleSearchFriendsType)},
-    relationship: {type: GraphQLString}
+    friends: { type: GraphQLList(SingleSearchFriendsType) },
+    relationship: { type: GraphQLString },
   }),
 });
 
 const SingleSearchFriendsType = new GraphQLObjectType({
-  name: 'SingleSearchFriendsType',
-  fields: ()=>({
-    accepted: {type: GraphQLBoolean},
-    friendshipDate: {type: GraphQLString}
-  })
-})
-
-
-
+  name: "SingleSearchFriendsType",
+  fields: () => ({
+    accepted: { type: GraphQLBoolean },
+    friendshipDate: { type: GraphQLString },
+  }),
+});
 
 const searchUsers = {
   type: FriendSearchType,
@@ -180,28 +178,28 @@ const searchUsers = {
         attributes: ["id", "username", "profileImage"],
       });
 
-      const friends = await User.findFriends(user.id, true)
-      const pendingFriends = await User.findFriends(user.id, false)
-      const relationship = {} //"PENDING" || "FRIENDS" || "NOT FRIENDS"
-      friends.forEach(user=>{
-        relationship[user.id] = 'FRIENDS'
-      })
+      const friends = await User.findFriends(user.id, true);
+      const pendingFriends = await User.findFriends(user.id, false);
+      const relationship = {}; //"PENDING" || "FRIENDS" || "NOT_FRIENDS"
+      friends.forEach(user => {
+        relationship[user.id] = "FRIENDS";
+      });
 
-      pendingFriends.forEach(user=>{
-        relationship[user.id] = 'PENDING'
-      })
+      pendingFriends.forEach(user => {
+        relationship[user.id] = "PENDING";
+      });
 
-      friends.forEach(user=>{
-        relationship[user.id] = 'FRIENDS'
-      })
+      friends.forEach(user => {
+        relationship[user.id] = "FRIENDS";
+      });
 
-      searchResult.forEach((user, index)=>{
-        if ((user.id) in relationship){
-          searchResult[index].relationship = relationship[user.id]
-        }else{
-          searchResult[index].relationship = 'NOT_FRIENDS'
+      searchResult.forEach((user, index) => {
+        if (user.id in relationship) {
+          searchResult[index].relationship = relationship[user.id];
+        } else {
+          searchResult[index].relationship = "NOT_FRIENDS";
         }
-      })
+      });
 
       return {
         result: searchResult,
@@ -244,7 +242,7 @@ const addFriend = {
     }
   },
 };
-
+console.log('HERE!!!!')
 // accept a friend request
 const acceptFriendReq = {
   type: FriendType,
@@ -257,17 +255,17 @@ const acceptFriendReq = {
       const date = JSON.stringify(new Date());
       const user = await User.findByToken(context.authorization);
 
-      const newFriend = await Friend.findOne({
+      let newFriend = await Friend.update(
+        {
+        accepted: true,
+        friendshipDate: date,
+      },
+        {
         where: {
           userId: friendId,
           friendId: user.id,
-        },
-      });
-
-      await newFriend.update({
-        accepted: true,
-        friendshipDate: date,
-      });
+        }}
+      );
 
       return {
         id: user.Id,

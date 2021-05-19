@@ -110,7 +110,7 @@ function getEagerLoading(firendType, accepted,Badge){
         model: User, as:  firendType,
         attributes: ['id', 'username', 'profileImage'],
          through:{
-         attributes: ['accepted', 'friendshipDate', 'userId', 'friendId'],
+         attributes: ['accepted', 'friendshipDate', 'userId', 'friendId', 'createdAt'],
           where:{
             accepted
           }
