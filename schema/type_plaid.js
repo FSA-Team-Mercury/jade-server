@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { User, Account } = require("../db");
+const moment = require("moment");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 const {
   GraphQLObjectType,
@@ -27,9 +28,8 @@ const plaidClient = new PlaidApi(configuration);
 const BalancesType = new GraphQLObjectType({
   name: "Balances",
   fields: () => ({
-    available: { type: GraphQLFloat },
     current: { type: GraphQLFloat },
-    limit: { type: GraphQLFloat },
+    iso_currency_code: { type: GraphQLString },
   }),
 });
 const InstitutionType = new GraphQLObjectType({
@@ -44,12 +44,12 @@ const InstitutionType = new GraphQLObjectType({
 const AccountType = new GraphQLObjectType({
   name: "PlaidAccount",
   fields: () => ({
-    account_id: { type: GraphQLID },
+    account_id: { type: GraphQLString },
     type: { type: GraphQLString },
+    mask: { type: GraphQLString },
     subtype: { type: GraphQLString },
     name: { type: GraphQLString },
     balances: { type: BalancesType },
-    offical_name: { type: GraphQLString },
   }),
 });
 
@@ -57,6 +57,7 @@ const TransactionTye = new GraphQLObjectType({
   name: "PlaidTransaction",
   fields: () => ({
     account_id: { type: GraphQLID },
+    transaction_id: { type: GraphQLID },
     amount: { type: GraphQLFloat },
     category: { type: GraphQLList(GraphQLString) },
     date: { type: GraphQLString },
@@ -87,11 +88,18 @@ const plaid = {
   type: PlaidObjectType,
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
+
     const accts = await user.getAccounts();
+    // retrieve data from beginning of month until the day of request
+    const beginnignOfYear = moment(new Date())
+      .startOf("year")
+      .format("YYYY-MM-DD");
+    const now = moment(new Date()).format("YYYY-MM-DD");
+
     const res = await plaidClient.transactionsGet({
       access_token: accts[0].auth_token,
-      start_date: "2021-03-01",
-      end_date: "2021-05-01",
+      start_date: beginnignOfYear,
+      end_date: now,
     });
     const insitutionID = res.data.item.institution_id;
     const request = {
@@ -104,7 +112,6 @@ const plaid = {
     const { data: inst_data } = await plaidClient.institutionsGetById(request);
     const { institution } = inst_data;
     return { ...res.data, institution };
-
   },
 };
 

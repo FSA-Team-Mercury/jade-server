@@ -14,6 +14,7 @@ const UserType = new GraphQLObjectType({
     id: { type: GraphQLID },
     username: { type: GraphQLString },
     password: { type: GraphQLString },
+    notification_token: { type: GraphQLString },
     accounts: {
       type: GraphQLList(AccountType),
       async resolve(parent) {
@@ -99,7 +100,6 @@ const logIn = {
       username: args.username,
       password: args.password,
     });
-    console.log('token-->', token)
     return { token };
   },
 };
@@ -111,6 +111,13 @@ const signUp = {
     password: { type: GraphQLString },
   },
   async resolve(parent, args) {
+    const user = await User.findOne({
+      where: { username: args.username },
+    });
+
+    if (user) {
+      throw new Error("This user already exists");
+    }
     await User.create({
       username: args.username,
       password: args.password,
@@ -119,8 +126,24 @@ const signUp = {
       username: args.username,
       password: args.password,
     });
-    console.log(token);
     return { token };
+  },
+};
+
+const addPushToken = {
+  type: BudgetType,
+  args: {
+    token: { type: GraphQLString },
+  },
+  async resolve(parent, args, context) {
+    try {
+      const user = await User.findByToken(context.authorization);
+      user.notification_token = args.token;
+      await user.save();
+      return user;
+    } catch (err) {
+      throw new Error(err);
+    }
   },
 };
 module.exports = {
@@ -130,6 +153,7 @@ module.exports = {
   user_mutations: {
     logIn,
     signUp,
+    addPushToken,
   },
   UserType,
 };
