@@ -12,11 +12,18 @@ const Friend = db.define("friends", {
     type: Sequelize.STRING,
     allowNull: true
   },
+  createdAt:{
+    type: Sequelize.STRING,
+    defaultValue: JSON.stringify(new Date()),
+    allowNull: false
+  }
 });
 
 
 
 module.exports = Friend;
+
+
 
 // Friend.acceptFriendReq = async function acceptFriendReq(user, newFriend){
 //   try {
