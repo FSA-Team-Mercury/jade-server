@@ -6,6 +6,8 @@ const User = require("./user");
 const Badge = require("./badge");
 const Challenge = require("./challenge");
 const Friend = require("./friends");
+const multiPlayerChallenge = require('./multiPlayerChallenge')
+const User_Challenge = require('./user_challenge')
 
 //associations
 Badge.belongsTo(User);
@@ -19,7 +21,12 @@ User.belongsToMany(User, {
   through: Friend,
 });
 
-// Friend.hasMany(User, {foreignKey:'friendId'})
+multiPlayerChallenge.belongsToMany(User, {through: User_Challenge})
+User.belongsToMany(multiPlayerChallenge, {through: User_Challenge})
+
+// User.hasMany(multiPlayerChallenge)
+
+// multiPlayerChallenge.belongsToMany(User, {as: 'ChallengeAccepter',through:multiPlayerChallenge, foreignKey: 'friendId'})
 
 User.hasMany(Account);
 Account.belongsTo(User);
@@ -48,6 +55,8 @@ module.exports = {
   Badge,
   Challenge,
   Friend,
+  multiPlayerChallenge,
+  User_Challenge
 };
 
 
