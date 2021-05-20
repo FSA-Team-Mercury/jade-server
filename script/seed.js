@@ -1,7 +1,15 @@
 const moment = require("moment");
 moment().format();
-const { db, User, Badge, Challenge, Budget, Friend } = require("../db");
-
+const {
+  db,
+  User,
+  Badge,
+  Challenge,
+  Budget,
+  Friend,
+  Account,
+} = require("../db");
+require("dotenv").config();
 async function acceptFriendReq(user, newFriend) {
   try {
     const acceptedFriends = await Friend.update(
@@ -33,32 +41,39 @@ async function seed() {
     User.create({
       username: "cody",
       password: "12345",
+      profileImage: "bad-bunny",
     }),
     User.create({
       username: "murphy",
       password: "12345",
+      profileImage: "ozil",
     }),
     User.create({
       username: "geza",
       password: "12345",
+      profileImage: "moe",
     }),
     User.create({
       username: "alan",
       password: "12345",
+      profileImage: "robo",
     }),
     User.create({
-      username: "d-ice",
+      username: "dnice",
       password: "12345",
+      profileImage: "rihanna",
     }),
     User.create({
       username: "dylan",
       password: "12345",
+      profileImage: "bad-bunny",
     }),
   ]);
-  // const accounts = await Promise.all([
 
-  // const codyChecking = accounts[0];
-  // await codyChecking.setUser(users[0]);
+  const acct = await Account.create({
+    auth_token: process.env.DEFAULLT_PLAID,
+  });
+  await users[0].addAccount(acct);
 
   const challenges = await Promise.all([
     Challenge.create({
@@ -83,15 +98,19 @@ async function seed() {
   const badges = await Promise.all([
     Badge.create({
       type: "big-saver",
+      badgeImage: "rainbow",
     }),
     Badge.create({
       type: "traveler",
+      badgeImage: "earth",
     }),
     Badge.create({
       type: "hermit",
+      badgeImage: "thunder",
     }),
     Badge.create({
       type: "smart-shopper",
+      badgeImage: "cascade",
     }),
     Badge.create({
       type: "big-spender",
@@ -159,7 +178,6 @@ async function seed() {
   await budgets[2].setUser(users[4]);
   await budgets[3].setUser(users[5]);
 
-  // console.log(users[0].__proto__)
   await users[0].addFriendsByRequest(users[1]);
   await acceptFriendReq(users[1], users[0]);
 
