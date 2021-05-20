@@ -111,8 +111,9 @@ const hashPassword = async (user) => {
   }
 };
 
-function getEagerLoading(firendType, accepted, Badge) {
+function getEagerLoading(friendType, accepted, Badge) {
   return {
+
     model: User,
     as: firendType,
     attributes: ["id", "username", "profileImage"],
@@ -133,6 +134,7 @@ function getEagerLoading(firendType, accepted, Badge) {
       attributes: ["type", "imageUrl", "createdAt"],
     },
   };
+
 }
 
 User.findFriends = async (id, accepted) => {
