@@ -35,7 +35,7 @@ async function acceptFriendReq(user, newFriend) {
 async function seed() {
   await db.sync({ force: true }); // clears db and matches models to tables
   console.log("db synced!");
-
+  console.log("process --->", process.env);
   // Creating Users
   const users = await Promise.all([
     User.create({
