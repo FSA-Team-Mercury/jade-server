@@ -17,7 +17,7 @@ const MultiPlayerChallengeType = new GraphQLObjectType({
     id: { type: GraphQLInt },
     username: { type: GraphQLString },
     friendId: { type: GraphQLID },
-    profileImage: { type: GraphQLString },
+    imageUrl: { type: GraphQLString },
     multiPlayerChallenges: { type: GraphQLList(multiPlayerChallengesType) },
   }),
 });
@@ -42,7 +42,7 @@ const usersType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLID },
     username: { type: GraphQLString },
-    profileImage: { type: GraphQLString },
+    imageUrl: { type: GraphQLString },
     notification_token: { type: GraphQLString },
     user_challenge: { type: userChallengeType },
   }),
@@ -139,7 +139,7 @@ const createMultiplayerChallenge = {
         startDate: Date.parse(startDate),
         endDate: Date.parse(endDate),
       });
-
+      console.log('friendId-->', friend.id, 'userId--->', user.id)
       // add both to challenge
       await newChallenge.addUsers([friend, user]);
 

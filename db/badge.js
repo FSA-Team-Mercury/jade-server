@@ -6,7 +6,7 @@ const Badge = db.define("badge", {
     type: Sequelize.ENUM("big-saver", "big-spender", "traveler", "hermit", "smart-shopper"),
     allowNull: false,
   },
-  badgeImage: {
+  imageUrl: {
     type: Sequelize.TEXT,
     defaultValue: 'rainbow',
   }
