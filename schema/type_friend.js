@@ -49,7 +49,7 @@ const FriendBadgeType = new GraphQLObjectType({
   name: "FriendBadgeType",
   fields: () => ({
     type: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    badgeImage: { type: GraphQLString },
     createdAt: { type: GraphQLString },
   }),
 });
