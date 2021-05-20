@@ -12,14 +12,11 @@ if (process.env.LOGGING === "true") {
 if (process.env.DATABASE_URL) {
   config.dialectOptions = {
     logging: false,
-    ssl: {
-      rejectUnauthorized: false,
-    },
+    // ssl: {
+    //   rejectUnauthorized: false,
+    // },
   };
 }
-const db = new Sequelize(
-  process.env.DATABASE_URL || "postgres://localhost:5432/jade",
-  config
-);
+const db = new Sequelize(process.env.DATABASE_URL, config);
 
 module.exports = db;
