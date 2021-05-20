@@ -36,7 +36,7 @@ const User = db.define("user", {
     type: Sequelize.STRING,
     allowNull: false,
   },
-  imageUrl: {
+  profileImage: {
     type: Sequelize.TEXT,
     allowNull: true,
     defaultValue:
@@ -113,10 +113,9 @@ const hashPassword = async (user) => {
 
 function getEagerLoading(friendType, accepted, Badge) {
   return {
-
     model: User,
     as: friendType,
-    attributes: ["id", "username", "imageUrl"],
+    attributes: ["id", "username", "profileImage"],
     through: {
       attributes: [
         "accepted",
@@ -131,10 +130,9 @@ function getEagerLoading(friendType, accepted, Badge) {
     },
     include: {
       model: Badge,
-      attributes: ["type", "imageUrl", "createdAt"],
+      attributes: ["type", "badgeImage", "createdAt"],
     },
   };
-
 }
 
 User.findFriends = async (id, accepted) => {
@@ -142,7 +140,7 @@ User.findFriends = async (id, accepted) => {
     where: {
       id,
     },
-    attributes: ["id", "username", "imageUrl"],
+    attributes: ["id", "username", "profileImage"],
     include: [
       getEagerLoading("friendsByRequest", accepted, Badge),
       getEagerLoading("friendsByInquire", accepted, Badge),

@@ -18,7 +18,7 @@ const FriendType = new GraphQLObjectType({
     id: { type: GraphQLInt },
     username: { type: GraphQLString },
     friendId: { type: GraphQLID },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     search: { type: GraphQLString },
   }),
 });
@@ -29,7 +29,7 @@ const FindFriendsType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLInt }, // maybe should be id
     username: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     friends: { type: GraphQLList(SingleFriendTableType) },
     badges: { type: GraphQLList(FriendBadgeType) },
   }),
@@ -49,7 +49,7 @@ const FriendBadgeType = new GraphQLObjectType({
   name: "FriendBadgeType",
   fields: () => ({
     type: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    badgeImage: { type: GraphQLString },
     createdAt: { type: GraphQLString },
   }),
 });
@@ -60,7 +60,7 @@ const FindPendingFriendsType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLInt }, // maybe should be id
     username: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     // friends: { type: GraphQLList(SingleFriendTableType) },
   }),
 });
@@ -145,8 +145,7 @@ const SingleSearchType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLID },
     username: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     friends: { type: GraphQLList(SingleSearchFriendsType) },
     relationship: { type: GraphQLString },
   }),
@@ -175,7 +174,7 @@ const searchUsers = {
             [Op.like]: `%${search}%`,
           },
         },
-        attributes: ["id", "username", "imageUrl"],
+        attributes: ["id", "username", "profileImage"],
       });
 
       const friends = await User.findFriends(user.id, true);

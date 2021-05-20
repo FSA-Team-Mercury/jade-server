@@ -12,17 +12,17 @@ const {
   GraphQLBoolean,
 } = require("graphql");
 
-const currentMonthCalc = (tran) => {
+const currentMonthCalc = tran => {
   const beginnignOfMonth = moment(new Date())
     .startOf("month")
     .format("YYYY-MM-DD");
 
-  const currMonthTran = tran.filter((singleTran) => {
+  const currMonthTran = tran.filter(singleTran => {
     return singleTran.date > beginnignOfMonth;
   });
   const categories = {};
   // adds categories and their amount
-  currMonthTran.forEach((curr) => {
+  currMonthTran.forEach(curr => {
     if (!categories[curr.category[0]]) {
       categories[curr.category[0]] = curr.amount;
     } else {
@@ -123,6 +123,12 @@ const plaid = {
         start_date: beginnignOfYear,
         end_date: now,
       });
+
+      //filtering out transactions
+      res.data.transactions = res.data.transactions.filter(
+        tra => !tra.category.includes("Transfer")
+      );
+
       // Updating current amount
       const expenseByCategory = currentMonthCalc(res.data.transactions);
       for (let category in expenseByCategory) {

@@ -17,7 +17,7 @@ const MultiPlayerChallengeType = new GraphQLObjectType({
     id: { type: GraphQLInt },
     username: { type: GraphQLString },
     friendId: { type: GraphQLID },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     multiPlayerChallenges: { type: GraphQLList(multiPlayerChallengesType) },
   }),
 });
@@ -42,7 +42,7 @@ const usersType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLID },
     username: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     notification_token: { type: GraphQLString },
     user_challenge: { type: userChallengeType },
   }),

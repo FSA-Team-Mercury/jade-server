@@ -3,13 +3,19 @@ const db = require("./database");
 
 const Badge = db.define("badge", {
   type: {
-    type: Sequelize.ENUM("big-saver", "big-spender", "traveler", "hermit", "smart-shopper"),
+    type: Sequelize.ENUM(
+      "big-saver",
+      "big-spender",
+      "traveler",
+      "hermit",
+      "smart-shopper"
+    ),
     allowNull: false,
   },
-  imageUrl: {
+  badgeImage: {
     type: Sequelize.TEXT,
-    defaultValue: 'rainbow',
-  }
+    defaultValue: "rainbow",
+  },
 });
 
 module.exports = Badge;

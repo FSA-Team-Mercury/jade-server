@@ -14,7 +14,7 @@ const UserType = new GraphQLObjectType({
     id: { type: GraphQLID },
     username: { type: GraphQLString },
     password: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
     notification_token: { type: GraphQLString },
     accounts: {
       type: GraphQLList(AccountType),
@@ -110,7 +110,7 @@ const signUp = {
   args: {
     username: { type: GraphQLString },
     password: { type: GraphQLString },
-    imageUrl: { type: GraphQLString },
+    profileImage: { type: GraphQLString },
   },
   async resolve(parent, args) {
     const user = await User.findOne({
@@ -123,7 +123,7 @@ const signUp = {
     await User.create({
       username: args.username,
       password: args.password,
-      imageUrl: args.imageUrl,
+      profileImage: args.profileImage,
     });
     const token = await User.authenticate({
       username: args.username,
