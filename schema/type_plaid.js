@@ -1,7 +1,7 @@
-require("dotenv").config();
-const { User, Account } = require("../db");
-const moment = require("moment");
-const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
+require('dotenv').config();
+const { User, Account } = require('../db');
+const moment = require('moment');
+const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 const {
   GraphQLObjectType,
   GraphQLString,
@@ -10,15 +10,15 @@ const {
   GraphQLList,
   GraphQLFloat,
   GraphQLBoolean,
-} = require("graphql");
+} = require('graphql');
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments.sandbox,
   baseOptions: {
     headers: {
-      "PLAID-CLIENT-ID": process.env.CLIENT_ID,
-      "PLAID-SECRET": process.env.SANDBOX_SECRET,
-      "Plaid-Version": "2020-09-14",
+      'PLAID-CLIENT-ID': process.env.CLIENT_ID,
+      'PLAID-SECRET': process.env.SANDBOX_SECRET,
+      'Plaid-Version': '2020-09-14',
     },
   },
 });
@@ -26,14 +26,14 @@ const configuration = new Configuration({
 const plaidClient = new PlaidApi(configuration);
 
 const BalancesType = new GraphQLObjectType({
-  name: "Balances",
+  name: 'Balances',
   fields: () => ({
     current: { type: GraphQLFloat },
     iso_currency_code: { type: GraphQLString },
   }),
 });
 const InstitutionType = new GraphQLObjectType({
-  name: "PlaidInst",
+  name: 'PlaidInst',
   fields: () => ({
     logo: { type: GraphQLString },
     name: { type: GraphQLString },
@@ -42,7 +42,7 @@ const InstitutionType = new GraphQLObjectType({
   }),
 });
 const AccountType = new GraphQLObjectType({
-  name: "PlaidAccount",
+  name: 'PlaidAccount',
   fields: () => ({
     account_id: { type: GraphQLString },
     type: { type: GraphQLString },
@@ -54,7 +54,7 @@ const AccountType = new GraphQLObjectType({
 });
 
 const TransactionTye = new GraphQLObjectType({
-  name: "PlaidTransaction",
+  name: 'PlaidTransaction',
   fields: () => ({
     account_id: { type: GraphQLID },
     transaction_id: { type: GraphQLID },
@@ -67,7 +67,7 @@ const TransactionTye = new GraphQLObjectType({
 });
 
 const PlaidObjectType = new GraphQLObjectType({
-  name: "PlaidObject",
+  name: 'PlaidObject',
   fields: () => ({
     accounts: { type: GraphQLList(AccountType) },
     transactions: { type: GraphQLList(TransactionTye) },
@@ -77,7 +77,7 @@ const PlaidObjectType = new GraphQLObjectType({
 });
 
 const TokenType = new GraphQLObjectType({
-  name: "PlaidToken",
+  name: 'PlaidToken',
   fields: () => ({
     auth_token: { type: GraphQLString },
   }),
@@ -92,19 +92,23 @@ const plaid = {
     const accts = await user.getAccounts();
     // retrieve data from beginning of month until the day of request
     const beginnignOfYear = moment(new Date())
-      .startOf("year")
-      .format("YYYY-MM-DD");
-    const now = moment(new Date()).format("YYYY-MM-DD");
+      .startOf('year')
+      .format('YYYY-MM-DD');
+    const now = moment(new Date()).format('YYYY-MM-DD');
 
-    const res = await plaidClient.transactionsGet({
+    let res = await plaidClient.transactionsGet({
       access_token: accts[0].auth_token,
       start_date: beginnignOfYear,
       end_date: now,
     });
+    //filtering out transactions
+    res.data.transactions = res.data.transactions.filter((tra) => !tra.category.includes('Transfer'))
+
+
     const insitutionID = res.data.item.institution_id;
     const request = {
       institution_id: insitutionID,
-      country_codes: ["US", "GB"],
+      country_codes: ['US', 'GB'],
       options: {
         include_optional_metadata: true,
       },
