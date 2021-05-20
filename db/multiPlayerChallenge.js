@@ -12,16 +12,19 @@ const multiPlayerChallenge = db.define("multiPlayerChallenge", {
     type: Sequelize.DATE,
     defaultValue: new Date(),
   },
-  winCondition:{
+  winCondition: {
     type: Sequelize.ENUM("GREATER_THAN", "LESS_THAN"),
     allowNull: false,
-    defaultValue: "LESS_THAN"
+    defaultValue: "LESS_THAN",
   },
-  winner:{
+  winner: {
     type: Sequelize.INTEGER,
-    allowNull: true
+    allowNull: true,
   },
-
+  winAmount: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  },
   endDate: {
     type: Sequelize.DATE,
     // allowNull: false, //this causes the route to break, even when an end date is entered
@@ -32,4 +35,4 @@ const multiPlayerChallenge = db.define("multiPlayerChallenge", {
   },
 });
 
-module.exports = multiPlayerChallenge
+module.exports = multiPlayerChallenge;
