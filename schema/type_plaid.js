@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { User, Account } = require('../db');
+const { User, Account, Budget } = require('../db');
 const moment = require('moment');
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 const {

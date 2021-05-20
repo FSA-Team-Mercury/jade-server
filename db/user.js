@@ -130,7 +130,7 @@ function getEagerLoading(friendType, accepted, Badge) {
     },
     include: {
       model: Badge,
-      attributes: ["type", "imageUrl", "createdAt"],
+      attributes: ["type", "badgeImage", "createdAt"],
     },
   };
 }
