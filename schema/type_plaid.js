@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { User, Account } = require("../db");
+const { User, Account, Budget } = require("../db");
 const moment = require("moment");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 const {
@@ -11,6 +11,27 @@ const {
   GraphQLFloat,
   GraphQLBoolean,
 } = require("graphql");
+
+const currentMonthCalc = (tran) => {
+  const beginnignOfMonth = moment(new Date())
+    .startOf("month")
+    .format("YYYY-MM-DD");
+
+  const currMonthTran = tran.filter((singleTran) => {
+    return singleTran.date > beginnignOfMonth;
+  });
+  const categories = {};
+  // adds categories and their amount
+  currMonthTran.forEach((curr) => {
+    if (!categories[curr.category[0]]) {
+      categories[curr.category[0]] = curr.amount;
+    } else {
+      categories[curr.category[0]] += curr.amount;
+    }
+  });
+
+  return categories;
+};
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments.sandbox,
@@ -87,31 +108,48 @@ const TokenType = new GraphQLObjectType({
 const plaid = {
   type: PlaidObjectType,
   async resolve(parent, args, context) {
-    const user = await User.findByToken(context.authorization);
+    try {
+      const user = await User.findByToken(context.authorization);
 
-    const accts = await user.getAccounts();
-    // retrieve data from beginning of month until the day of request
-    const beginnignOfYear = moment(new Date())
-      .startOf("year")
-      .format("YYYY-MM-DD");
-    const now = moment(new Date()).format("YYYY-MM-DD");
+      const accts = await user.getAccounts();
+      // retrieve data from beginning of month until the day of request
+      const beginnignOfYear = moment(new Date())
+        .startOf("year")
+        .format("YYYY-MM-DD");
+      const now = moment(new Date()).format("YYYY-MM-DD");
 
-    const res = await plaidClient.transactionsGet({
-      access_token: accts[0].auth_token,
-      start_date: beginnignOfYear,
-      end_date: now,
-    });
-    const insitutionID = res.data.item.institution_id;
-    const request = {
-      institution_id: insitutionID,
-      country_codes: ["US", "GB"],
-      options: {
-        include_optional_metadata: true,
-      },
-    };
-    const { data: inst_data } = await plaidClient.institutionsGetById(request);
-    const { institution } = inst_data;
-    return { ...res.data, institution };
+      const res = await plaidClient.transactionsGet({
+        access_token: accts[0].auth_token,
+        start_date: beginnignOfYear,
+        end_date: now,
+      });
+      // Updating current amount
+      const expenseByCategory = currentMonthCalc(res.data.transactions);
+      for (let category in expenseByCategory) {
+        const budgetVar = await Budget.update(
+          { currentAmount: expenseByCategory[category] * 100 },
+          { where: { userId: user.id, category, isCompleted: false } }
+        );
+      }
+
+      // Getting institution data
+      const insitutionID = res.data.item.institution_id;
+      const request = {
+        institution_id: insitutionID,
+        country_codes: ["US", "GB"],
+        options: {
+          include_optional_metadata: true,
+        },
+      };
+      const { data: inst_data } = await plaidClient.institutionsGetById(
+        request
+      );
+      const { institution } = inst_data;
+
+      return { ...res.data, institution };
+    } catch (err) {
+      throw new Error(err);
+    }
   },
 };
 
