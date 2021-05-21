@@ -25,6 +25,10 @@ const multiPlayerChallenge = db.define("multiPlayerChallenge", {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
+  category:{
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   endDate: {
     type: Sequelize.DATE,
     // allowNull: false, //this causes the route to break, even when an end date is entered

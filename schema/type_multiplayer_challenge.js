@@ -56,7 +56,70 @@ const userChallengeType = new GraphQLObjectType({
   }),
 });
 
+const updateUsersChallenges = new GraphQLObjectType({
+  name:'updateUsersChallenges',
+  fields:()=>({
+    multiPlayerChallengeId: {type: GraphQLID},
+    updatedData: {type: MultiPlayerChallengeType}
+  })
+})
+
 // Queries
+
+const getChallenge = {
+  type: MultiPlayerChallengeType,
+  args:{
+    challengeId: {type: GraphQLID}
+  },
+  async resolve(parent,args,context){
+    const {challengeId:id} = args
+    try {
+      // const user = await User.findByToken(context.authorization)
+      const user = await User.findOne({
+        where:{
+          id: 1
+        }
+      })
+      // console.log(user)
+      const challenge = await multiPlayerChallenge.findOne({
+      where:{
+        id
+      },
+      include:User,
+    })
+    console.log(challenge)
+  const friendIds = challenge.users.reduce((accum,user)=>{
+    accum.push(user.id)
+    return accum
+  },[])
+
+  // const beginnignOfMonth = ()=>{
+  //   return moment(new Date())
+  //         .startOf("month")
+  //         .format("YYYY-MM-DD");
+  // }
+  const args = {
+    friendIds,
+    winAmount: challenge.winAmount,
+    startDate: startDate,
+    endDate: endDate,
+    challengeId: challenge.id,
+    category: "Recreation"
+    }
+
+  const resp = await updateAndCalculateChallenge(args)
+  const newCalcs = challenge.users.map((user,index)=>{
+      user.user_challenge.currentAmout = resp[user.id]
+      return user
+    })
+    challenge.users = newCalcs
+
+    return challenge
+    } catch (error) {
+      throw Error('error getting challenge')
+    }
+  }
+}
 const allMultiPlayerChallenges = {
   type: MultiPlayerChallengeType,
   async resolve(parent, args, context) {
@@ -109,7 +172,7 @@ const currentMultiPlayerChallenges = {
   },
 };
 
-// get user challenges
+// create user challenges
 
 const createMultiplayerChallenge = {
   type: MultiPlayerChallengeType,
@@ -119,25 +182,27 @@ const createMultiplayerChallenge = {
     startDate: { type: GraphQLString },
     winCondition: { type: GraphQLString },
     endDate: { type: GraphQLString },
+    category: {type: GraphQLString},
     winAmount: { type: GraphQLInt },
   },
   async resolve(parent, args, context) {
     try {
-      const { friendId, name, startDate, endDate, winCondition,winAmount } = args;
+      const { friendId, name, startDate, endDate, winCondition,winAmount,category } = args;
       const user = await User.findByToken(context.authorization);
-      // const user = await User.findByPk(1);
 
       // get friend
       const friend = await User.findByPk(friendId);
       if (!friend) {
         throw new Error("user does not exist");
       }
+
       const newChallenge = await multiPlayerChallenge.create({
         name,
         winCondition,
         winAmount,
         startDate: Date.parse(startDate),
         endDate: Date.parse(endDate),
+        category
       });
       console.log('friendId-->', friend.id, 'userId--->', user.id)
       // add both to challenge
@@ -197,6 +262,7 @@ module.exports = {
   multiplayer_queries: {
     currentMultiPlayerChallenges,
     allMultiPlayerChallenges,
+    getChallenge,
   },
   multiplayer_mutations: {
     createMultiplayerChallenge,
