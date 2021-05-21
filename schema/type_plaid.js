@@ -126,7 +126,7 @@ const plaid = {
 
       //filtering out transactions
       res.data.transactions = res.data.transactions.filter(
-        tra => !tra.category.includes("Transfer")
+        (tra) => !tra.category.includes("Transfer")
       );
 
       // Updating current amount
