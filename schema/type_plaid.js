@@ -12,17 +12,17 @@ const {
   GraphQLBoolean,
 } = require("graphql");
 
-const currentMonthCalc = (tran) => {
+const currentMonthCalc = tran => {
   const beginnignOfMonth = moment(new Date())
     .startOf("month")
     .format("YYYY-MM-DD");
 
-  const currMonthTran = tran.filter((singleTran) => {
+  const currMonthTran = tran.filter(singleTran => {
     return singleTran.date > beginnignOfMonth;
   });
   const categories = {};
   // adds categories and their amount
-  currMonthTran.forEach((curr) => {
+  currMonthTran.forEach(curr => {
     if (!categories[curr.category[0]]) {
       categories[curr.category[0]] = curr.amount;
     } else {
