@@ -50,7 +50,7 @@ async function seed() {
     User.create({
       username: "geza",
       password: "12345",
-      profileImage: "moe",
+      profileImage: "salah",
     }),
     User.create({
       username: "alan",
