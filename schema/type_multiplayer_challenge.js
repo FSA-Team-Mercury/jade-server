@@ -66,60 +66,6 @@ const updateUsersChallenges = new GraphQLObjectType({
 
 // Queries
 
-const getChallenge = {
-  type: MultiPlayerChallengeType,
-  args:{
-    challengeId: {type: GraphQLID}
-  },
-  async resolve(parent,args,context){
-    const {challengeId:id} = args
-    try {
-      // const user = await User.findByToken(context.authorization)
-      const user = await User.findOne({
-        where:{
-          id: 1
-        }
-      })
-      // console.log(user)
-      const challenge = await multiPlayerChallenge.findOne({
-      where:{
-        id
-      },
-      include:User,
-    })
-    console.log(challenge)
-  const friendIds = challenge.users.reduce((accum,user)=>{
-    accum.push(user.id)
-    return accum
-  },[])
-
-  // const beginnignOfMonth = ()=>{
-  //   return moment(new Date())
-  //         .startOf("month")
-  //         .format("YYYY-MM-DD");
-  // }
-  const args = {
-    friendIds,
-    winAmount: challenge.winAmount,
-    startDate: startDate,
-    endDate: endDate,
-    challengeId: challenge.id,
-    category: "Recreation"
-    }
-
-  const resp = await updateAndCalculateChallenge(args)
-  const newCalcs = challenge.users.map((user,index)=>{
-      user.user_challenge.currentAmout = resp[user.id]
-      return user
-    })
-    challenge.users = newCalcs
-
-    return challenge
-    } catch (error) {
-      throw Error('error getting challenge')
-    }
-  }
-}
 const allMultiPlayerChallenges = {
   type: MultiPlayerChallengeType,
   async resolve(parent, args, context) {
@@ -171,6 +117,61 @@ const currentMultiPlayerChallenges = {
     }
   },
 };
+
+
+// MUTATION
+
+
+const updateChallenge = {
+  type: MultiPlayerChallengeType,
+  args:{
+    challengeId: {type: GraphQLID}
+  },
+  async resolve(parent,args,context){
+    const {challengeId:id} = args
+    console.log("here____")
+    try {
+      // const user = await User.findByToken(context.authorization)
+      const user = await User.findOne({
+        where:{
+          id: 1
+        }
+      })
+
+      const challenge = await multiPlayerChallenge.findOne({
+      where:{
+        id:1
+      },
+      include:User,
+    })
+    console.log(challenge)
+  const friendIds = challenge.users.reduce((accum,user)=>{
+    accum.push(user.id)
+    return accum
+  },[])
+
+  const args = {
+    friendIds,
+    winAmount: challenge.winAmount,
+    startDate: startDate,
+    endDate: endDate,
+    challengeId: challenge.id,
+    category: "Recreation"
+    }
+
+  const resp = await updateAndCalculateChallenge(args)
+  const newCalcs = challenge.users.map((user,index)=>{
+      user.user_challenge.currentAmout = resp[user.id]
+      return user
+    })
+    challenge.users = newCalcs
+
+    return challenge
+    } catch (error) {
+      throw Error('error getting challenge')
+    }
+  }
+}
 
 // create user challenges
 
@@ -262,10 +263,10 @@ module.exports = {
   multiplayer_queries: {
     currentMultiPlayerChallenges,
     allMultiPlayerChallenges,
-    getChallenge,
   },
   multiplayer_mutations: {
     createMultiplayerChallenge,
+    updateChallenge,
     leaveChallenge,
   },
 };
