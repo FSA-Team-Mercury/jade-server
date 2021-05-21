@@ -1,6 +1,8 @@
 const graphql = require("graphql");
 const { User, multiPlayerChallenge, User_Challenge } = require("../db");
+const moment = require("moment");
 const { Op } = require("sequelize");
+const {updateAndCalculateChallenge} = require('../func/updateChallenges')
 
 const {
   GraphQLObjectType,
@@ -115,59 +117,66 @@ const currentMultiPlayerChallenges = {
       console.log("error in friends\n", err);
       throw new Error("error finding curent challenges");
     }
-  },
+  }
 };
 
 
 // MUTATION
 
-
 const updateChallenge = {
-  type: MultiPlayerChallengeType,
-  args:{
-    challengeId: {type: GraphQLID}
+  type: multiPlayerChallengesType,
+  args: {
+    challengeId: { type: GraphQLID },
   },
   async resolve(parent,args,context){
-    const {challengeId:id} = args
-    console.log("here____")
+    const {challengeId} = args
+
+    let id = 1
+    console.log("here in updateChallenge", challengeId)
     try {
+      console.log('befor ageting user====>')
       // const user = await User.findByToken(context.authorization)
-      const user = await User.findOne({
-        where:{
-          id: 1
-        }
-      })
+      const user = await User.findByPk(1)
 
       const challenge = await multiPlayerChallenge.findOne({
-      where:{
-        id:1
-      },
-      include:User,
-    })
-    console.log(challenge)
-  const friendIds = challenge.users.reduce((accum,user)=>{
-    accum.push(user.id)
-    return accum
-  },[])
+        where:{
+          id :challengeId
+        },
+        include: User,
+      })
 
-  const args = {
+      const friendIds = challenge.users.reduce((accum,user)=>{
+        accum.push(user.id)
+        return accum
+      },[])
+
+    const beginnignOfMonth = moment(new Date())
+          .startOf("month")
+          .format("YYYY-MM-DD");
+
+    const args = {
     friendIds,
     winAmount: challenge.winAmount,
-    startDate: startDate,
-    endDate: endDate,
+    startDate: beginnignOfMonth,
+    endDate: challenge.endDate,
     challengeId: challenge.id,
     category: "Recreation"
     }
 
-  const resp = await updateAndCalculateChallenge(args)
-  const newCalcs = challenge.users.map((user,index)=>{
+
+    const resp = await updateAndCalculateChallenge(args)
+
+    const newCalcs = challenge.users.map((user,index)=>{
       user.user_challenge.currentAmout = resp[user.id]
+      if (1 === index){
+        user.user_challenge.currentAmout += resp[user.id]
+      }
       return user
     })
     challenge.users = newCalcs
-
     return challenge
     } catch (error) {
+      console.log('error in challenge-->', error)
       throw Error('error getting challenge')
     }
   }
@@ -228,8 +237,8 @@ const leaveChallenge = {
   },
   async resolve(parent, args, context) {
     try {
-      const user = await User.findByToken(context.authorization);
-      // const user = await User.findByPk(1);
+      // const user = await User.findByToken(context.authorization);
+      const user = await User.findByPk(1);
       const { challengeId } = args;
 
       const update = await User_Challenge.update(

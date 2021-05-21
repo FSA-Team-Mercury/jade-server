@@ -40,7 +40,7 @@ router.get('/:id', async (req,res,next)=>{
     }
 
   const resp = await updateAndCalculateChallenge(args)
-  
+
   const newCalcs = challenge.users.map((user,index)=>{
     user.user_challenge.currentAmout = resp[user.id]
     if (1 === index){

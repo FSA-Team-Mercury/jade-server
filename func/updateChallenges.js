@@ -23,7 +23,7 @@ const getDateForPlaid = (date)=>{
 }
 
 const getUserTransactions = async (auth_token, startDate, endDate)=>{
-  
+
   const res = await plaidClient.transactionsGet({
     access_token: auth_token,
     start_date: getDateForPlaid(startDate),
@@ -68,6 +68,7 @@ const getWinningOrder = (users, winCondition)=>{
 
 // get an array of users in challenge
 const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endDate, challengeId,category})=>{
+  console.log('here---> in func file')
 
   const userSpendings = {}
   for(let i =0; i< friendIds.length; i++){
@@ -96,7 +97,7 @@ const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endD
     )
     userSpendings[userId] = totalSpent
   }
-
+  console.log('func-->', userSpendings)
   return userSpendings
 }
 
