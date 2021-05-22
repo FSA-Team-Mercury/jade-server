@@ -146,7 +146,6 @@ const SingleSearchType = new GraphQLObjectType({
     id: { type: GraphQLID },
     username: { type: GraphQLString },
     profileImage: { type: GraphQLString },
-    profileImage: { type: GraphQLString },
     friends: { type: GraphQLList(SingleSearchFriendsType) },
     relationship: { type: GraphQLString },
   }),

@@ -14,6 +14,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use("/plaid", require("./plaid"));
+app.use("/func", require("./func"));
+app.use("/challenges", require("./challenges"));
 
 app.use(
   "/graphql",
@@ -34,7 +36,7 @@ app.get("/", function (req, res, next) {
   res.send("Hello, Nothing to see here yet!");
 });
 
-app.use('/challenges', require('./challenges'))
+app.use("/challenges", require("./challenges"));
 
 // error handling middleware
 app.use((req, res, next) => {
