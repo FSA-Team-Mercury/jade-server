@@ -128,6 +128,8 @@ async function seed() {
   await badges[3].setUser(users[4]);
   await badges[4].setUser(users[5]);
 
+  
+
   const budgets = await Promise.all([
     Budget.create({
       category: "Food and Drink",
