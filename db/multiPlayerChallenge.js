@@ -33,6 +33,10 @@ const multiPlayerChallenge = db.define("multiPlayerChallenge", {
     type: Sequelize.DATE,
     // allowNull: false, //this causes the route to break, even when an end date is entered
   },
+  badgeImage:{
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
   completed: {
     type: Sequelize.BOOLEAN,
     defaultValue: false,
