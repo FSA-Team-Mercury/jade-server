@@ -31,7 +31,7 @@ const multiPlayerChallengesType = new GraphQLObjectType({
     winCondition: { type: GraphQLString },
     endDate: { type: GraphQLString },
     completed: { type: GraphQLBoolean },
-    // createdAt: {type: GraphQLString},
+    createdAt: { type: GraphQLString },
     user_challenge: { type: userChallengeType },
     users: { type: GraphQLList(usersType) },
   }),
@@ -57,12 +57,12 @@ const userChallengeType = new GraphQLObjectType({
 });
 
 const updateUsersChallenges = new GraphQLObjectType({
-  name:'updateUsersChallenges',
-  fields:()=>({
-    multiPlayerChallengeId: {type: GraphQLID},
-    updatedData: {type: MultiPlayerChallengeType}
-  })
-})
+  name: "updateUsersChallenges",
+  fields: () => ({
+    multiPlayerChallengeId: { type: GraphQLID },
+    updatedData: { type: MultiPlayerChallengeType },
+  }),
+});
 
 // Queries
 
@@ -118,60 +118,58 @@ const currentMultiPlayerChallenges = {
   },
 };
 
-
 // MUTATION
-
 
 const updateChallenge = {
   type: MultiPlayerChallengeType,
-  args:{
-    challengeId: {type: GraphQLID}
+  args: {
+    challengeId: { type: GraphQLID },
   },
-  async resolve(parent,args,context){
-    const {challengeId:id} = args
-    console.log("here____")
+  async resolve(parent, args, context) {
+    const { challengeId: id } = args;
+    console.log("here____");
     try {
       // const user = await User.findByToken(context.authorization)
       const user = await User.findOne({
-        where:{
-          id: 1
-        }
-      })
+        where: {
+          id: 1,
+        },
+      });
 
       const challenge = await multiPlayerChallenge.findOne({
-      where:{
-        id:1
-      },
-      include:User,
-    })
-    console.log(challenge)
-  const friendIds = challenge.users.reduce((accum,user)=>{
-    accum.push(user.id)
-    return accum
-  },[])
+        where: {
+          id: 1,
+        },
+        include: User,
+      });
+      console.log(challenge);
+      const friendIds = challenge.users.reduce((accum, user) => {
+        accum.push(user.id);
+        return accum;
+      }, []);
 
-  const args = {
-    friendIds,
-    winAmount: challenge.winAmount,
-    startDate: startDate,
-    endDate: endDate,
-    challengeId: challenge.id,
-    category: "Recreation"
-    }
+      const args = {
+        friendIds,
+        winAmount: challenge.winAmount,
+        startDate: startDate,
+        endDate: endDate,
+        challengeId: challenge.id,
+        category: "Recreation",
+      };
 
-  const resp = await updateAndCalculateChallenge(args)
-  const newCalcs = challenge.users.map((user,index)=>{
-      user.user_challenge.currentAmout = resp[user.id]
-      return user
-    })
-    challenge.users = newCalcs
+      const resp = await updateAndCalculateChallenge(args);
+      const newCalcs = challenge.users.map((user, index) => {
+        user.user_challenge.currentAmout = resp[user.id];
+        return user;
+      });
+      challenge.users = newCalcs;
 
-    return challenge
+      return challenge;
     } catch (error) {
-      throw Error('error getting challenge')
+      throw Error("error getting challenge");
     }
-  }
-}
+  },
+};
 
 // create user challenges
 
@@ -183,12 +181,20 @@ const createMultiplayerChallenge = {
     startDate: { type: GraphQLString },
     winCondition: { type: GraphQLString },
     endDate: { type: GraphQLString },
-    category: {type: GraphQLString},
+    category: { type: GraphQLString },
     winAmount: { type: GraphQLInt },
   },
   async resolve(parent, args, context) {
     try {
-      const { friendId, name, startDate, endDate, winCondition,winAmount,category } = args;
+      const {
+        friendId,
+        name,
+        startDate,
+        endDate,
+        winCondition,
+        winAmount,
+        category,
+      } = args;
       const user = await User.findByToken(context.authorization);
 
       // get friend
@@ -203,9 +209,9 @@ const createMultiplayerChallenge = {
         winAmount,
         startDate: Date.parse(startDate),
         endDate: Date.parse(endDate),
-        category
+        category,
       });
-      console.log('friendId-->', friend.id, 'userId--->', user.id)
+      console.log("friendId-->", friend.id, "userId--->", user.id);
       // add both to challenge
       await newChallenge.addUsers([friend, user]);
 
