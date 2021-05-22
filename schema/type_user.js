@@ -1,10 +1,10 @@
 const graphql = require("graphql");
-const { User, Account, Challenge, Budget, Badge, Savings } = require("../db");
+const { User, Account, Challenge, Budget, Badge } = require("../db");
 const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } = graphql;
 const { AccountType } = require("./type_account");
 const { ChallengeType } = require("./type_challenge");
 const { BadgeType } = require("./type_badge");
-const { SavingType } = require("./type_saving");
+
 const { BudgetType } = require("./type_budget");
 
 // TYPE
@@ -49,17 +49,7 @@ const UserType = new GraphQLObjectType({
         return badges;
       },
     },
-    savings: {
-      type: GraphQLList(SavingType),
-      async resolve(parent) {
-        const savings = await Savings.findAll({
-          where: {
-            userId: parent.id,
-          },
-        });
-        return savings;
-      },
-    },
+   
     budgets: {
       type: GraphQLList(BudgetType),
       async resolve(parent) {

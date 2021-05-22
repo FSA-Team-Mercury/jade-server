@@ -87,7 +87,6 @@ const allMultiPlayerChallenges = {
           },
         ],
       });
-      console.log("challenges--->", challenges);
       return challenges;
     } catch (err) {
       console.log("error in friends\n", err);
@@ -178,7 +177,7 @@ const updateChallenge = {
         category: "Recreation",
       };
 
-      console.log("friendId-->", friendIds);
+
       const resp = await updateAndCalculateChallenge(args);
 
       const newCalcs = challenge.users.map((user, index) => {
@@ -203,7 +202,6 @@ const updateChallenge = {
 };
 
 // create user challenges
-
 const createMultiplayerChallenge = {
   type: MultiPlayerChallengeType,
   args: {
@@ -245,7 +243,7 @@ const createMultiplayerChallenge = {
         category,
         badgeImage,
       });
-      console.log("friendId-->", friend.id, "userId--->", user.id);
+
       // add both to challenge
       await newChallenge.addUsers([friend, user]);
 
@@ -264,7 +262,7 @@ const createMultiplayerChallenge = {
         ],
       });
 
-      console.log("new challenege11-->>", challenges);
+
       return challenges;
     } catch (err) {
       console.log("error in create multiplayer challenge\n", err);
