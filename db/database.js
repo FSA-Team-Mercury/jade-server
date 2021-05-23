@@ -9,14 +9,14 @@ const config = {
 //   delete config.logging;
 // }
 
-// if (process.env.DATABASE_URL) {
-//   config.dialectOptions = {
-//     logging: false,
-//     ssl: {
-//       rejectUnauthorized: false,
-//     },
-//   };
-// }
-const db = new Sequelize('postgres://localhost/jade', config);
+if (process.env.DATABASE_URL) {
+  config.dialectOptions = {
+    logging: false,
+    // ssl: {
+    //   rejectUnauthorized: false,
+    // },
+  };
+}
+const db = new Sequelize(process.env.DATABASE_URL, config);
 
 module.exports = db;

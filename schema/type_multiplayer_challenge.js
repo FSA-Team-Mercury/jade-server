@@ -2,6 +2,7 @@ const graphql = require("graphql");
 const { User, multiPlayerChallenge,Badge, User_Challenge } = require("../db");
 const moment = require("moment");
 const { Op } = require("sequelize");
+const { GraphQLScalarType, Kind } = require('graphql');
 const {
   updateAndCalculateChallenge,
   calculateWinner,
@@ -15,6 +16,24 @@ const {
   GraphQLList,
   GraphQLBoolean,
 } = graphql;
+
+
+//  const DateType = new GraphQLScalarType({
+//   name: 'Date',
+//   parseLiteral(ast) {
+//     if (ast.kind === Kind.INT) {
+//       return parseInt(ast.value, 10);
+//     }
+//     return null;
+//   },
+//   parseValue(value: string): Date {
+//     return new Date(value);
+//   },
+//   serialize(value: string | Date): string {
+//     return typeof value === 'string' ? value : value.toISOString();
+//   },
+// });
+
 
 const MultiPlayerChallengeType = new GraphQLObjectType({
   name: "MultiPlayerChallengeType",
@@ -39,6 +58,7 @@ const multiPlayerChallengesType = new GraphQLObjectType({
     endDate: { type: GraphQLString },
     completed: { type: GraphQLBoolean },
     category: { type: GraphQLString },
+    createdAt: { type: GraphQLString },
     badgeImage: { type: GraphQLString },
     user_challenge: { type: userChallengeType },
     users: { type: GraphQLList(usersType) },
@@ -91,10 +111,12 @@ const allMultiPlayerChallenges = {
           },
         ],
       });
+      // console.log(challenge.multiPlayerChallenges[0].endDate.toISOString())
+
+      console.log('challenge--->', challenges.multiPlayerChallenges)
       return challenges;
     } catch (err) {
-      console.log("error in friends\n", err);
-      throw new Error("error find all challenges");
+      throw new Error("Error finding all challenges", err);
     }
   },
 };
@@ -104,7 +126,6 @@ const currentMultiPlayerChallenges = {
   async resolve(parent, args, context) {
     try {
       const user = await User.findByToken(context.authorization);
-      // const user = await User.findByPk(4);
       const challenges = await User.findOne({
         where: {
           id: user.id,
@@ -148,23 +169,24 @@ const updateChallenge = {
         },
         include: User,
       });
-      const endDate = moment(challenge.endDate)
-        .startOf("month")
-        .format("YYYY-MM-DD");
 
-      console.log('endDate type-->', typeof endDate)
-      console.log('endDate-->', endDate)
+      // const endDate = moment(challenge.endDate)
+      //   .startOf("month")
+      //   .format("YYYY-MM-DD");
+
       const friendIds = challenge.users.reduce((accum, user) => {
         accum.push(user.id);
         return accum;
       }, []);
 
-      const beginnignOfMonth = moment(new Date())
-        .startOf("month")
-        .format("YYYY-MM-DD");
+      const getStartDate = (date)=>{
+        return moment(date)
+              .format("YYYY-MM-DD");
+              // .startOf("month")
+      }
 
       const currentDate = new Date();
-      if (currentDate >= challenge.endDate && !challenge.completed) {
+      if (currentDate >= Date.parse(challenge.endDate) && !challenge.completed) {
         // need to check if the task is marked complete
         if (challenge.completed) {
           return challenge;
@@ -175,18 +197,18 @@ const updateChallenge = {
           { where: { id: challengeId } }
         );
         findWinner = true;
+        challenge.completed = true
       }
 
       const args = {
         friendIds,
         winAmount: challenge.winAmount,
-        startDate: beginnignOfMonth,
-        endDate: challenge.endDate,
+        startDate: getStartDate(challenge.startDate),
+        endDate: Date.parse(challenge.endDate),
         challengeId: challenge.id,
         category: challenge.category,
       };
 
-      console.log("friendId-->", friendIds);
       const res = await updateAndCalculateChallenge(args);
 
       const newCalcs = challenge.users.map((user, index) => {
@@ -198,9 +220,8 @@ const updateChallenge = {
       });
 
       if (findWinner) {
-        const targetAmount = challenge.winAmount
+        const targetAmount = challenge.winAmount / 100 // to dollars
         const winningOrder = calculateWinner(newCalcs,targetAmount, challenge.winCondition)
-
         if (winningOrder.length){
           await multiPlayerChallenge.update({
             winner: winningOrder[0].id
@@ -210,20 +231,17 @@ const updateChallenge = {
               id: challengeId,
             }
           });
-
+          challenge.winner = winningOrder[0].id
           await Badge.create({
             type: challenge.name,
             badgeImage: challenge.badgeImage,
-            userId: winningOrder[0].id
+            userId: winningOrder[0].id,
+            challengeId: challenge.id
           })
         }
       }
 
       challenge.users = newCalcs;
-      // let temp = Object.assign({},challenge)
-      challenge.endDate = moment(challenge.endDate).format("MM-DD-YYYY")
-      console.log('challenge--->', )
-
       return challenge;
     } catch (error) {
       console.log("error in challenge-->", error);
@@ -233,13 +251,11 @@ const updateChallenge = {
 };
 
 // create user challenges
-
 const createMultiplayerChallenge = {
   type: MultiPlayerChallengeType,
   args: {
     friendId: { type: GraphQLID },
     name: { type: GraphQLString },
-    startDate: { type: GraphQLString },
     winCondition: { type: GraphQLString },
     endDate: { type: GraphQLString },
     category: { type: GraphQLString },
@@ -260,13 +276,12 @@ const createMultiplayerChallenge = {
       } = args;
       const user = await User.findByToken(context.authorization);
       // const user = await User.findByPk(2)
-
+      console.log('saving endDate--->', endDate)
       const newChallenge = await multiPlayerChallenge.create({
         name,
         winCondition,
         winAmount,
-        startDate: Date.parse(startDate),
-        endDate: Date.parse(endDate),
+        endDate: endDate,
         category,
         badgeImage,
       });
@@ -305,44 +320,6 @@ const createMultiplayerChallenge = {
   },
 };
 
-// leave a challenge
-const leaveChallenge = {
-  type: MultiPlayerChallengeType,
-  args: {
-    challengeId: { type: GraphQLID },
-  },
-  async resolve(parent, args, context) {
-    try {
-      // const user = await User.findByToken(context.authorization);
-      const user = await User.findByPk(1);
-      const { challengeId } = args;
-
-      const update = await User_Challenge.update(
-        {
-          leftChallenge: true,
-        },
-        {
-          where: {
-            userId: user.id,
-            multiPlayerChallengeId: challengeId,
-          },
-        }
-      );
-
-      // if it didn't update it will be [0] else [1]
-      if (!update[0]) {
-        throw new Error("no such challenge in db");
-      }
-
-      return {
-        id: user.id,
-      };
-    } catch (error) {
-      console.log("error in leaving challenge==>", error);
-      throw new Error("error leaving challenge");
-    }
-  },
-};
 
 module.exports = {
   multiplayer_queries: {
@@ -352,6 +329,5 @@ module.exports = {
   multiplayer_mutations: {
     createMultiplayerChallenge,
     updateChallenge,
-    leaveChallenge,
   },
 };

@@ -9,6 +9,7 @@ const BadgeType = new GraphQLObjectType({
     userId: { type: GraphQLInt },
     type: { type: GraphQLString },
     badgeImage: {type: GraphQLString },
+    challengeId: {type: GraphQLID },
   }),
 });
 
@@ -18,8 +19,7 @@ const userBadges = {
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization)
     return Badge.findAll({
-      where: { userId: user.id, }, //not working??
-      // where: { userId: 1 } //this line used for testing route
+      where: { userId: user.id, },
     });
   },
 };
@@ -43,8 +43,7 @@ const addBadge = {
     let badge = await Badge.create({
       type: args.type,
     });
-    await badge.setUser(await User.findByToken(context.authorization)); //use in final code
-    // await badge.setUser(await User.findByPk(1)) //this line used for testing route
+    await badge.setUser(await User.findByToken(context.authorization));
     return badge;
   },
 };
