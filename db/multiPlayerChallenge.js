@@ -44,3 +44,5 @@ const multiPlayerChallenge = db.define("multiPlayerChallenge", {
 });
 
 module.exports = multiPlayerChallenge;
+
+

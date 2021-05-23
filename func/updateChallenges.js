@@ -45,26 +45,6 @@ const getUserSpendings = (transactions,category) =>{
   return total
 }
 
-const getWinningOrder = (users, winCondition)=>{
-  console.log('win COndition---->', winCondition)
-  switch (winCondition) {
-    case 'LESS_THAN':
-      let greaterThanOrder = users.sort((a,b)=>{
-        return a.user_challenge.currentAmout - b.user_challenge.currentAmout
-      })
-      return greaterThanOrder
-    case "GREATER_THAN":
-      let lessThanOrder = users.sort((a,b)=>{
-          return  b.user_challenge.currentAmout - a.user_challenge.currentAmout
-        })
-      return lessThanOrder
-    default:
-      return {
-        error : 'not proper winCondition'
-      };
-  }
-}
-
 
 
 // get an array of users in challenge
@@ -103,6 +83,29 @@ const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endD
   return userSpendings
 }
 
+
+const calculateWinner = (users,targetAmount, winCondition)=>{
+  switch (winCondition) {
+    case 'LESS_THAN':
+      let greaterThanOrder = users.sort((a,b)=>{
+        return a.user_challenge.currentAmout - b.user_challenge.currentAmout
+      })
+      // in order to be a valid win they have to spend the targetAmount at min
+      return greaterThanOrder >= targetAmount ? greaterThanOrder : []
+    case "GREATER_THAN":
+      let lessThanOrder = users.sort((a,b)=>{
+          return  b.user_challenge.currentAmout - a.user_challenge.currentAmout
+        })
+      // in order to be a valid win they have to spend the targetAmount at min
+      return lessThanOrder <= targetAmount ? lessThanOrder : []
+    default:
+      return {
+        error : 'not proper winCondition'
+      };
+  }
+}
+
+
 exports.updateAndCalculateChallenge = updateAndCalculateChallenge
 
-exports.getWinningOrder = getWinningOrder
+exports.calculateWinner = calculateWinner
