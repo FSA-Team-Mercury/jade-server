@@ -4,11 +4,19 @@ const moment = require("moment");
 moment().format();
 
 
-const Budget = db.define("budget", {
+const Budget = db.define('budget', {
   category: {
-    type: Sequelize.ENUM("Entertainment", "Other", "Food and Drink", "Shops", "Transfer", "Payment", "Travel", "Recreation"),
+    type: Sequelize.ENUM(
+      'Entertainment',
+      'Other',
+      'Food and Drink',
+      'Shops',
+      'Payment',
+      'Travel',
+      'Recreation'
+    ),
     allowNull: false,
-    defaultValue: "Other",
+    defaultValue: 'Other',
   },
   goalAmount: {
     type: Sequelize.INTEGER,
@@ -28,11 +36,13 @@ const Budget = db.define("budget", {
   endDate: {
     type: Sequelize.STRING,
     defaultValue: String(new Date()),
+
   },
   // just keep month
   startDate: {
     type: Sequelize.STRING,
     defaultValue: String(new Date()),
+
   },
   isCompleted: {
     type: Sequelize.BOOLEAN,

@@ -28,7 +28,7 @@ async function acceptFriendReq(user, newFriend) {
       throw new Error("new friend did not request a friendship");
     }
   } catch (error) {
-    console.log("ERROR ACCEPTING FRIEnD", error);
+    console.log("ERROR ACCEPTING FRIEND", error);
   }
 }
 
@@ -174,6 +174,8 @@ async function seed() {
   await users[4].addBadge(badges[12]);
   await users[4].addBadge(badges[13]);
   await users[5].addBadge(badges[14]);
+
+
 
   const budgets = await Promise.all([
     Budget.create({

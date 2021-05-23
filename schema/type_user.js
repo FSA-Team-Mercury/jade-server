@@ -1,10 +1,10 @@
 const graphql = require("graphql");
-const { User, Account, Challenge, Budget, Badge, Savings } = require("../db");
+const { User, Account, Challenge, Budget, Badge } = require("../db");
 const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } = graphql;
 const { AccountType } = require("./type_account");
 const { ChallengeType } = require("./type_challenge");
 const { BadgeType } = require("./type_badge");
-const { SavingType } = require("./type_saving");
+
 const { BudgetType } = require("./type_budget");
 
 // TYPE
@@ -49,17 +49,7 @@ const UserType = new GraphQLObjectType({
         return badges;
       },
     },
-    savings: {
-      type: GraphQLList(SavingType),
-      async resolve(parent) {
-        const savings = await Savings.findAll({
-          where: {
-            userId: parent.id,
-          },
-        });
-        return savings;
-      },
-    },
+
     budgets: {
       type: GraphQLList(BudgetType),
       async resolve(parent) {
@@ -149,6 +139,29 @@ const addPushToken = {
     }
   },
 };
+
+const updateProfilePic = {
+  type: UserType,
+  args: {
+    id: { type: GraphQLID },
+    profileImage: { type: GraphQLString },
+  },
+  async resolve(parent, args, context) {
+    try {
+      const user = await User.findByToken(context.authorization);
+      // const user = await User.findByToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjIxNzUwMTE5fQ.tbo6SCrJ_PE99-ONvHIvObeo6LTrZPOL73HV-q9up-c');
+      user.profileImage = args.profileImage;
+      await user.save()
+      return user
+    } catch (err) {
+      throw new Error(err);
+    }
+  },
+};
+
+
+
+
 module.exports = {
   user_queries: {
     user,
@@ -157,6 +170,7 @@ module.exports = {
     logIn,
     signUp,
     addPushToken,
+    updateProfilePic,
   },
   UserType,
 };

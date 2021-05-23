@@ -200,7 +200,6 @@ const updateChallenge = {
 };
 
 // create user challenges
-
 const createMultiplayerChallenge = {
   type: MultiPlayerChallengeType,
   args: {
@@ -242,7 +241,7 @@ const createMultiplayerChallenge = {
         category,
         badgeImage,
       });
-      console.log("friendId-->", friend.id, "userId--->", user.id);
+
       // add both to challenge
       await newChallenge.addUsers([friend, user]);
 
