@@ -105,15 +105,15 @@ async function seed() {
     }),
     Badge.create({
       type: "hermit",
-      badgeImage: "thunder",
+      badgeImage: "soul",
     }),
     Badge.create({
       type: "smart-shopper",
-      badgeImage: "cascade",
+      badgeImage: "marsh",
     }),
     Badge.create({
       type: "big-spender",
-      types: "iceberg",
+      badgeImage: "boulder",
     }),
     Badge.create({
       type: "big-saver",
@@ -125,15 +125,15 @@ async function seed() {
     }),
     Badge.create({
       type: "hermit",
-      badgeImage: "thunder",
+      badgeImage: "soul",
     }),
     Badge.create({
       type: "smart-shopper",
-      badgeImage: "cascade",
+      badgeImage: "marsh",
     }),
     Badge.create({
       type: "big-spender",
-      types: "iceberg",
+      badgeImage: "boulder",
     }),
     Badge.create({
       type: "big-saver",
@@ -145,15 +145,15 @@ async function seed() {
     }),
     Badge.create({
       type: "hermit",
-      badgeImage: "thunder",
+      badgeImage: "soul",
     }),
     Badge.create({
       type: "smart-shopper",
-      badgeImage: "cascade",
+      badgeImage: "marsh",
     }),
     Badge.create({
       type: "big-spender",
-      types: "iceberg",
+      badgeImage: "boulder",
     }),
   ]);
 

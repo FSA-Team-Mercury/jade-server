@@ -1,7 +1,6 @@
 const graphql = require("graphql");
-const { User, Friend, Badge, Challenge } = require("../db");
+const { User, Friend } = require("../db");
 const { Op } = require("sequelize");
-const { UserType } = require("./type_user");
 
 const {
   GraphQLObjectType,
@@ -20,6 +19,7 @@ const FriendType = new GraphQLObjectType({
     friendId: { type: GraphQLID },
     profileImage: { type: GraphQLString },
     search: { type: GraphQLString },
+    badges: { type: GraphQLList(FriendBadgeType) },
   }),
 });
 
@@ -61,7 +61,6 @@ const FindPendingFriendsType = new GraphQLObjectType({
     id: { type: GraphQLInt }, // maybe should be id
     username: { type: GraphQLString },
     profileImage: { type: GraphQLString },
-    // friends: { type: GraphQLList(SingleFriendTableType) },
   }),
 });
 
@@ -74,7 +73,9 @@ const SearchingUsersType = new GraphQLObjectType({
   }),
 });
 
-// Queries
+// *********** //
+//   Queries   //
+// *********** //
 // friends that have accepted your request
 const friends = {
   type: new GraphQLList(FindFriendsType),
@@ -126,19 +127,11 @@ const FriendSearchType = new GraphQLObjectType({
   name: "FriendSearchType",
   fields: () => ({
     result: { type: GraphQLList(SingleSearchType) },
-    // relationship: {type: GraphQLList(FriendRealtionshipType)},
     pendingFriends: { type: GraphQLList(SingleSearchType) },
     friends: { type: GraphQLList(SingleSearchType) },
     search: { type: GraphQLString },
   }),
 });
-
-// const FriendRealtionshipType = new GraphQLObjectType({
-//   name: 'FriendRealtionshipType',
-//   fields:()=>({
-//     []: {type: GraphQLString}
-//   })
-// })
 
 const SingleSearchType = new GraphQLObjectType({
   name: "SingleSearchType",
@@ -170,9 +163,18 @@ const searchUsers = {
       const user = await User.findByToken(context.authorization);
       const searchResult = await User.findAll({
         where: {
-          username: {
-            [Op.like]: `%${search}%`,
-          },
+          [Op.and]: [
+            {
+              id: {
+                [Op.not]: user.id,
+              },
+            },
+            {
+              username: {
+                [Op.like]: `%${search}%`,
+              },
+            },
+          ],
         },
         attributes: ["id", "username", "profileImage"],
       });
@@ -180,15 +182,15 @@ const searchUsers = {
       const friends = await User.findFriends(user.id, true);
       const pendingFriends = await User.findFriends(user.id, false);
       const relationship = {}; //"PENDING" || "FRIENDS" || "NOT_FRIENDS"
-      friends.forEach(user => {
+      friends.forEach((user) => {
         relationship[user.id] = "FRIENDS";
       });
 
-      pendingFriends.forEach(user => {
+      pendingFriends.forEach((user) => {
         relationship[user.id] = "PENDING";
       });
 
-      friends.forEach(user => {
+      friends.forEach((user) => {
         relationship[user.id] = "FRIENDS";
       });
 
@@ -204,13 +206,14 @@ const searchUsers = {
         result: searchResult,
       };
     } catch (err) {
-      console.log("error in friends\n", err);
-      throw new Error("Error Searching users", error);
+      throw new Error("Error Searching users", err);
     }
   },
 };
 
-// MUTATION
+// *********** //
+//  MUTATIONS  //
+// *********** //
 
 // follow a friend
 const addFriend = {
@@ -236,12 +239,11 @@ const addFriend = {
         friendId: newFriend.id,
       };
     } catch (error) {
-      console.log("ERROR adding Friend\n", error);
-      throw new Error("there was an error add this friend");
+      throw new Error("there was an error adding this friend", error);
     }
   },
 };
-console.log('HERE!!!!')
+
 // accept a friend request
 const acceptFriendReq = {
   type: FriendType,
@@ -256,24 +258,23 @@ const acceptFriendReq = {
 
       let newFriend = await Friend.update(
         {
-        accepted: true,
-        friendshipDate: date,
-      },
+          accepted: true,
+          friendshipDate: date,
+        },
         {
-        where: {
-          userId: friendId,
-          friendId: user.id,
-        }}
+          where: {
+            userId: friendId,
+            friendId: user.id,
+          },
+        }
       );
-
       return {
         id: user.Id,
         friendId,
         friendshipDate: date,
       };
     } catch (error) {
-      console.log("ERROR accepting friendRequest\n", error);
-      throw new Error("there was an error accepting this follow");
+      throw new Error("ERROR accepting friendRequest\n", error);
     }
   },
 };
@@ -313,8 +314,7 @@ const unfollowUser = {
         friendId,
       };
     } catch (err) {
-      console.log("error in friends\n", err);
-      throw new Error("There was an error unfollowing this user");
+      throw new Error("There was an error unfollowing this user", err);
     }
   },
 };

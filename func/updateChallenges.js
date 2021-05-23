@@ -23,7 +23,7 @@ const getDateForPlaid = (date)=>{
 }
 
 const getUserTransactions = async (auth_token, startDate, endDate)=>{
-  
+
   const res = await plaidClient.transactionsGet({
     access_token: auth_token,
     start_date: getDateForPlaid(startDate),
@@ -46,6 +46,7 @@ const getUserSpendings = (transactions,category) =>{
 }
 
 const getWinningOrder = (users, winCondition)=>{
+  console.log('win COndition---->', winCondition)
   switch (winCondition) {
     case 'LESS_THAN':
       let greaterThanOrder = users.sort((a,b)=>{
@@ -68,11 +69,13 @@ const getWinningOrder = (users, winCondition)=>{
 
 // get an array of users in challenge
 const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endDate, challengeId,category})=>{
+  console.log('here---> in func file')
 
   const userSpendings = {}
   for(let i =0; i< friendIds.length; i++){
     userId = friendIds[i]
-    const userAccount = await  Account.findOne({
+    console.log('userId-->', userId)
+    const userAccount = await Account.findOne({
       where:{
         userId
       }
@@ -96,8 +99,10 @@ const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endD
     )
     userSpendings[userId] = totalSpent
   }
-
+  console.log('func-->', userSpendings)
   return userSpendings
 }
 
 exports.updateAndCalculateChallenge = updateAndCalculateChallenge
+
+exports.getWinningOrder = getWinningOrder
