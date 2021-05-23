@@ -27,6 +27,8 @@ User.belongsToMany(User, {
 multiPlayerChallenge.belongsToMany(User, { through: User_Challenge });
 User.belongsToMany(multiPlayerChallenge, { through: User_Challenge });
 
+Badge.belongsTo(multiPlayerChallenge,{as:"challenge",foreignKey: 'challengeId'})
+
 // User.hasMany(multiPlayerChallenge)
 
 // multiPlayerChallenge.belongsToMany(User, {as: 'ChallengeAccepter',through:multiPlayerChallenge, foreignKey: 'friendId'})

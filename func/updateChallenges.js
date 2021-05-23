@@ -48,22 +48,23 @@ const getUserSpendings = (transactions,category) =>{
 const getWinningOrder = (users, winCondition)=>{
   switch (winCondition) {
     case 'LESS_THAN':
-      let greaterThanOrder = users.sort((a,b)=>{
+    console.log('LESS_THAN users--->',users)
+      let lessThanOrder = users.sort((a,b)=>{
         return a.user_challenge.currentAmout - b.user_challenge.currentAmout
       })
-      return greaterThanOrder
+      return lessThanOrder
     case "GREATER_THAN":
-      let lessThanOrder = users.sort((a,b)=>{
+    console.log('GREATER_THAN users--->',users)
+      let greaterThanOrder = users.sort((a,b)=>{
           return  b.user_challenge.currentAmout - a.user_challenge.currentAmout
         })
-      return lessThanOrder
+      return greaterThanOrder
     default:
       return {
         error : 'not proper winCondition'
       };
   }
 }
-
 
 
 // get an array of users in challenge
@@ -98,10 +99,33 @@ const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endD
     )
     userSpendings[userId] = totalSpent
   }
-  
+
   return userSpendings
 }
 
+
+const calculateWinner = (users,targetAmount, winCondition)=>{
+  switch (winCondition) {
+    case 'LESS_THAN':
+      let lessThanOrder = users.sort((a,b)=>{
+        return a.user_challenge.currentAmout - b.user_challenge.currentAmout
+      })
+      // in order to be a valid win they have to spend the targetAmount at min
+      return lessThanOrder[0].user_challenge.currentAmout <= targetAmount ? lessThanOrder : []
+    case "GREATER_THAN":
+      let greaterThanOrder = users.sort((a,b)=>{
+          return  b.user_challenge.currentAmout - a.user_challenge.currentAmout
+        })
+      // in order to be a valid win they have to spend the targetAmount at min
+      return greaterThanOrder[0].user_challenge.currentAmout >= targetAmount ? greaterThanOrder : []
+    default:
+      return {
+        error : 'not proper winCondition'
+      };
+  }
+}
+
+
 exports.updateAndCalculateChallenge = updateAndCalculateChallenge
 
-exports.getWinningOrder = getWinningOrder
+exports.calculateWinner = calculateWinner
