@@ -36,6 +36,7 @@ const multiPlayerChallengesType = new GraphQLObjectType({
     winCondition: { type: GraphQLString },
     endDate: { type: GraphQLString },
     completed: { type: GraphQLBoolean },
+    createdAt: { type: GraphQLString },
     badgeImage: { type: GraphQLString },
     user_challenge: { type: userChallengeType },
     users: { type: GraphQLList(usersType) },
@@ -87,11 +88,9 @@ const allMultiPlayerChallenges = {
           },
         ],
       });
-      console.log("challenges--->", challenges);
       return challenges;
     } catch (err) {
-      console.log("error in friends\n", err);
-      throw new Error("error find all challenges");
+      throw new Error("Error finding all challenges", err);
     }
   },
 };
@@ -101,7 +100,6 @@ const currentMultiPlayerChallenges = {
   async resolve(parent, args, context) {
     try {
       const user = await User.findByToken(context.authorization);
-      // const user = await User.findByPk(1);
       const challenges = await User.findOne({
         where: {
           id: user.id,
@@ -178,7 +176,6 @@ const updateChallenge = {
         category: "Recreation",
       };
 
-      console.log("friendId-->", friendIds);
       const resp = await updateAndCalculateChallenge(args);
 
       const newCalcs = challenge.users.map((user, index) => {
@@ -203,7 +200,6 @@ const updateChallenge = {
 };
 
 // create user challenges
-
 const createMultiplayerChallenge = {
   type: MultiPlayerChallengeType,
   args: {
@@ -245,7 +241,7 @@ const createMultiplayerChallenge = {
         category,
         badgeImage,
       });
-      console.log("friendId-->", friend.id, "userId--->", user.id);
+
       // add both to challenge
       await newChallenge.addUsers([friend, user]);
 
@@ -264,7 +260,6 @@ const createMultiplayerChallenge = {
         ],
       });
 
-      console.log("new challenege11-->>", challenges);
       return challenges;
     } catch (err) {
       console.log("error in create multiplayer challenge\n", err);

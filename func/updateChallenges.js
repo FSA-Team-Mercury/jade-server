@@ -46,7 +46,6 @@ const getUserSpendings = (transactions,category) =>{
 }
 
 const getWinningOrder = (users, winCondition)=>{
-  console.log('win COndition---->', winCondition)
   switch (winCondition) {
     case 'LESS_THAN':
       let greaterThanOrder = users.sort((a,b)=>{
@@ -69,12 +68,12 @@ const getWinningOrder = (users, winCondition)=>{
 
 // get an array of users in challenge
 const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endDate, challengeId,category})=>{
-  console.log('here---> in func file')
+
 
   const userSpendings = {}
   for(let i =0; i< friendIds.length; i++){
     userId = friendIds[i]
-    console.log('userId-->', userId)
+
     const userAccount = await Account.findOne({
       where:{
         userId
@@ -99,7 +98,7 @@ const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endD
     )
     userSpendings[userId] = totalSpent
   }
-  console.log('func-->', userSpendings)
+  
   return userSpendings
 }
 

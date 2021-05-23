@@ -28,7 +28,7 @@ async function acceptFriendReq(user, newFriend) {
       throw new Error("new friend did not request a friendship");
     }
   } catch (error) {
-    console.log("ERROR ACCEPTING FRIEnD", error);
+    console.log("ERROR ACCEPTING FRIEND", error);
   }
 }
 
@@ -105,27 +105,77 @@ async function seed() {
     }),
     Badge.create({
       type: "hermit",
-      badgeImage: "thunder",
+      badgeImage: "soul",
     }),
     Badge.create({
       type: "smart-shopper",
-      badgeImage: "cascade",
+      badgeImage: "marsh",
     }),
     Badge.create({
       type: "big-spender",
+      badgeImage: "boulder",
+    }),
+    Badge.create({
+      type: "big-saver",
+      badgeImage: "rainbow",
+    }),
+    Badge.create({
+      type: "traveler",
+      badgeImage: "earth",
+    }),
+    Badge.create({
+      type: "hermit",
+      badgeImage: "soul",
+    }),
+    Badge.create({
+      type: "smart-shopper",
+      badgeImage: "marsh",
+    }),
+    Badge.create({
+      type: "big-spender",
+      badgeImage: "boulder",
+    }),
+    Badge.create({
+      type: "big-saver",
+      badgeImage: "rainbow",
+    }),
+    Badge.create({
+      type: "traveler",
+      badgeImage: "earth",
+    }),
+    Badge.create({
+      type: "hermit",
+      badgeImage: "soul",
+    }),
+    Badge.create({
+      type: "smart-shopper",
+      badgeImage: "marsh",
+    }),
+    Badge.create({
+      type: "big-spender",
+      badgeImage: "boulder",
     }),
   ]);
 
-  await badges[0].setUser(users[0]);
-  await badges[1].setUser(users[0]);
-  await badges[2].setUser(users[1]);
-  await badges[3].setUser(users[1]);
-  await badges[4].setUser(users[0]);
+  await users[0].addBadge(badges[0]);
+  await users[0].addBadge(badges[1]);
+  await users[0].addBadge(badges[2]);
+  await users[0].addBadge(badges[3]);
+  await users[5].addBadge(badges[4]);
 
-  await badges[1].setUser(users[2]);
-  await badges[2].setUser(users[3]);
-  await badges[3].setUser(users[4]);
-  await badges[4].setUser(users[5]);
+  await users[1].addBadge(badges[5]);
+  await users[1].addBadge(badges[6]);
+  await users[1].addBadge(badges[7]);
+  await users[2].addBadge(badges[8]);
+  await users[2].addBadge(badges[9]);
+
+  await users[3].addBadge(badges[10]);
+  await users[3].addBadge(badges[11]);
+  await users[4].addBadge(badges[12]);
+  await users[4].addBadge(badges[13]);
+  await users[5].addBadge(badges[14]);
+
+
 
   const budgets = await Promise.all([
     Budget.create({
