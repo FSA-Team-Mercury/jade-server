@@ -1,6 +1,5 @@
-const router = require("express").Router();
 require("dotenv").config();
-const { User, Account, Budget,multiPlayerChallenge,User_Challenge } = require("../db");
+const { Account, User_Challenge } = require("../db");
 const moment = require("moment");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
@@ -17,115 +16,103 @@ const configuration = new Configuration({
 
 const plaidClient = new PlaidApi(configuration);
 
-const getDateForPlaid = (date)=>{
-  return moment(date)
-        .format("YYYY-MM-DD");
-}
+const getDateForPlaid = (date) => {
+  return moment(date).format("YYYY-MM-DD");
+};
 
-const getUserTransactions = async (auth_token, startDate, endDate)=>{
-
+const getUserTransactions = async (auth_token, startDate, endDate) => {
   const res = await plaidClient.transactionsGet({
     access_token: auth_token,
     start_date: getDateForPlaid(startDate),
-    end_date: getDateForPlaid(endDate)
+    end_date: getDateForPlaid(endDate),
   });
 
-  return res.data.transactions
-}
+  return res.data.transactions;
+};
 
-const getUserSpendings = (transactions,category) =>{
-  let total = 0
+const getUserSpendings = (transactions, category) => {
+  let total = 0;
 
-  transactions.forEach(item=>{
-    if (item.category[0] === category){
-      total += item.amount
+  transactions.forEach((item) => {
+    if (item.category[0] === category) {
+      total += item.amount;
     }
-  })
+  });
 
-  return total
-}
-
-const getWinningOrder = (users, winCondition)=>{
-  switch (winCondition) {
-    case 'LESS_THAN':
-    console.log('LESS_THAN users--->',users)
-      let lessThanOrder = users.sort((a,b)=>{
-        return a.user_challenge.currentAmout - b.user_challenge.currentAmout
-      })
-      return lessThanOrder
-    case "GREATER_THAN":
-    console.log('GREATER_THAN users--->',users)
-      let greaterThanOrder = users.sort((a,b)=>{
-          return  b.user_challenge.currentAmout - a.user_challenge.currentAmout
-        })
-      return greaterThanOrder
-    default:
-      return {
-        error : 'not proper winCondition'
-      };
-  }
-}
-
+  return total;
+};
 
 // get an array of users in challenge
-const updateAndCalculateChallenge = async ({friendIds,winAmount, startDate, endDate, challengeId,category})=>{
-
-
-  const userSpendings = {}
-  for(let i =0; i< friendIds.length; i++){
-    userId = friendIds[i]
+const updateAndCalculateChallenge = async ({
+  friendIds,
+  startDate,
+  endDate,
+  challengeId,
+  category,
+}) => {
+  const userSpendings = {};
+  for (let i = 0; i < friendIds.length; i++) {
+    let userId = friendIds[i];
 
     const userAccount = await Account.findOne({
-      where:{
-        userId
-      }
-    })
+      where: {
+        userId,
+      },
+    });
 
     // get transactions for user
-    const transactions = await getUserTransactions(userAccount.auth_token, startDate, endDate)
+    const transactions = await getUserTransactions(
+      userAccount.auth_token,
+      startDate,
+      endDate
+    );
 
     // need to round to second place
-    const totalSpent = Math.floor(getUserSpendings(transactions,category))
+    const totalSpent = Math.floor(getUserSpendings(transactions, category));
 
     // Upade challenges with new spendings
-    await User_Challenge.update({
-      currentAmout: totalSpent
-    },{
-      where:{
-        userId,
-        multiPlayerChallengeId: challengeId
+    await User_Challenge.update(
+      {
+        currentAmout: totalSpent,
+      },
+      {
+        where: {
+          userId,
+          multiPlayerChallengeId: challengeId,
+        },
       }
-    }
-    )
-    userSpendings[userId] = totalSpent
+    );
+    userSpendings[userId] = totalSpent;
   }
 
-  return userSpendings
-}
+  return userSpendings;
+};
 
-
-const calculateWinner = (users,targetAmount, winCondition)=>{
+const calculateWinner = (users, targetAmount, winCondition) => {
   switch (winCondition) {
-    case 'LESS_THAN':
-      let lessThanOrder = users.sort((a,b)=>{
-        return a.user_challenge.currentAmout - b.user_challenge.currentAmout
-      })
+    case "LESS_THAN":
+      let lessThanOrder = users.sort((a, b) => {
+        return a.user_challenge.currentAmout - b.user_challenge.currentAmout;
+      });
       // in order to be a valid win they have to spend the targetAmount at min
-      return lessThanOrder[0].user_challenge.currentAmout <= targetAmount ? lessThanOrder : []
+      return lessThanOrder[0].user_challenge.currentAmout <= targetAmount
+        ? lessThanOrder
+        : [];
     case "GREATER_THAN":
-      let greaterThanOrder = users.sort((a,b)=>{
-          return  b.user_challenge.currentAmout - a.user_challenge.currentAmout
-        })
+      let greaterThanOrder = users.sort((a, b) => {
+        return b.user_challenge.currentAmout - a.user_challenge.currentAmout;
+      });
       // in order to be a valid win they have to spend the targetAmount at min
-      return greaterThanOrder[0].user_challenge.currentAmout >= targetAmount ? greaterThanOrder : []
+      return greaterThanOrder[0].user_challenge.currentAmout >= targetAmount
+        ? greaterThanOrder
+        : [];
     default:
       return {
-        error : 'not proper winCondition'
+        error: "not proper winCondition",
       };
   }
-}
+};
 
+exports.updateAndCalculateChallenge = updateAndCalculateChallenge;
 
-exports.updateAndCalculateChallenge = updateAndCalculateChallenge
-
-exports.calculateWinner = calculateWinner
+exports.calculateWinner = calculateWinner;

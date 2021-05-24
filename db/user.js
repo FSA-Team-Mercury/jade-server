@@ -2,7 +2,6 @@ const Sequelize = require("sequelize");
 const db = require("./database");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-// const { Badge } = require("./index");
 const Badge = require("./badge");
 require("dotenv").config();
 

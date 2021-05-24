@@ -1,34 +1,32 @@
 const router = require("express").Router();
 require("dotenv").config();
-const { User, Account, Budget,multiPlayerChallenge,User_Challenge } = require("../db");
+const { User, multiPlayerChallenge } = require("../db");
 const moment = require("moment");
-const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
-const {updateAndCalculateChallenge} = require('../func/updateChallenges')
+const { updateAndCalculateChallenge } = require("../func/updateChallenges");
 
-const getDateForPlaid = (date)=>{
-  return moment(date)
-        .format("YYYY-MM-DD");
-}
+const getDateForPlaid = (date) => {
+  return moment(date).format("YYYY-MM-DD");
+};
 
-router.get('/:id', async (req,res,next)=>{
-  const id = req.params.id
+router.get("/:id", async (req, res, next) => {
+  const id = req.params.id;
 
   const challenge = await multiPlayerChallenge.findOne({
-    where:{
-      id
+    where: {
+      id,
     },
-    include:User,
-  })
+    include: User,
+  });
 
-  const friendIds = challenge.users.reduce((accum,user)=>{
-    accum.push(user.id)
-    return accum
-  },[])
+  const friendIds = challenge.users.reduce((accum, user) => {
+    accum.push(user.id);
+    return accum;
+  }, []);
 
   const beginnignOfMonth = moment(new Date())
-        .startOf("month")
-        .format("YYYY-MM-DD");
+    .startOf("month")
+    .format("YYYY-MM-DD");
 
   const args = {
     friendIds,
@@ -36,20 +34,20 @@ router.get('/:id', async (req,res,next)=>{
     startDate: beginnignOfMonth,
     endDate: getDateForPlaid(challenge.endDate),
     challengeId: challenge.id,
-    category: "Recreation"
+    category: "Recreation",
+  };
+
+  const resp = await updateAndCalculateChallenge(args);
+
+  const newCalcs = challenge.users.map((user, index) => {
+    user.user_challenge.currentAmout = resp[user.id];
+    if (1 === index) {
+      user.user_challenge.currentAmout += resp[user.id];
     }
+    return user;
+  });
 
-  const resp = await updateAndCalculateChallenge(args)
-
-  const newCalcs = challenge.users.map((user,index)=>{
-    user.user_challenge.currentAmout = resp[user.id]
-    if (1 === index){
-      user.user_challenge.currentAmout += resp[user.id]
-    }
-    return user
-  })
-
-  res.send(challenge)
-})
+  res.send(challenge);
+});
 
 module.exports = router;
