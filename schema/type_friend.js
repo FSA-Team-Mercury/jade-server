@@ -64,15 +64,6 @@ const FindPendingFriendsType = new GraphQLObjectType({
   }),
 });
 
-// search users in db friends
-const SearchingUsersType = new GraphQLObjectType({
-  name: "SearchingUsersType",
-  fields: () => ({
-    id: { type: GraphQLInt }, // maybe should be id
-    username: { type: GraphQLString },
-  }),
-});
-
 // *********** //
 //   Queries   //
 // *********** //
@@ -103,25 +94,6 @@ const pendingFriends = {
     }
   },
 };
-
-// find mutual friends
-const MutualFriendsType = new GraphQLObjectType({
-  name: "MutualFriendsType",
-  fields: () => ({
-    friend: { type: IntFriendType },
-    mutualFriends: { type: GraphQLList(SingleMutualFriendType) },
-  }),
-});
-const SingleMutualFriendType = new GraphQLObjectType({
-  name: "SingleMutualFriendType",
-  fields: () => ({}),
-});
-const IntFriendType = new GraphQLObjectType({
-  name: "IntFriendType",
-  fields: () => ({
-    id: { type: GraphQLID },
-  }),
-});
 
 const FriendSearchType = new GraphQLObjectType({
   name: "FriendSearchType",
@@ -255,7 +227,7 @@ const acceptFriendReq = {
       const { friendId } = args;
       const date = JSON.stringify(new Date());
       const user = await User.findByToken(context.authorization);
-
+      
       let newFriend = await Friend.update(
         {
           accepted: true,

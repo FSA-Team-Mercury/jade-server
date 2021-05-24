@@ -1,12 +1,5 @@
-const router = require("express").Router();
 require("dotenv").config();
-const {
-  User,
-  Account,
-  Budget,
-  multiPlayerChallenge,
-  User_Challenge,
-} = require("../db");
+const { Account, User_Challenge } = require("../db");
 const moment = require("moment");
 const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 
@@ -49,31 +42,9 @@ const getUserSpendings = (transactions, category) => {
   return total;
 };
 
-const getWinningOrder = (users, winCondition) => {
-  switch (winCondition) {
-    case "LESS_THAN":
-      console.log("LESS_THAN users--->", users);
-      let lessThanOrder = users.sort((a, b) => {
-        return a.user_challenge.currentAmout - b.user_challenge.currentAmout;
-      });
-      return lessThanOrder;
-    case "GREATER_THAN":
-      console.log("GREATER_THAN users--->", users);
-      let greaterThanOrder = users.sort((a, b) => {
-        return b.user_challenge.currentAmout - a.user_challenge.currentAmout;
-      });
-      return greaterThanOrder;
-    default:
-      return {
-        error: "not proper winCondition",
-      };
-  }
-};
-
 // get an array of users in challenge
 const updateAndCalculateChallenge = async ({
   friendIds,
-  winAmount,
   startDate,
   endDate,
   challengeId,
@@ -81,7 +52,7 @@ const updateAndCalculateChallenge = async ({
 }) => {
   const userSpendings = {};
   for (let i = 0; i < friendIds.length; i++) {
-    userId = friendIds[i];
+    let userId = friendIds[i];
 
     const userAccount = await Account.findOne({
       where: {

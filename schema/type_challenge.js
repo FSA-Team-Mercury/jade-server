@@ -25,8 +25,7 @@ const userChallenges = {
   async resolve(parent, args, context) {
     const user = await User.findByToken(context.authorization);
     return Challenge.findAll({
-      where: { userId: user.id }, //use in final code
-      // where: { userId: 1 } //this line used for testing route
+      where: { userId: user.id },
     });
   },
 };
@@ -52,7 +51,6 @@ const addChallenge = {
       type: args.type,
     });
     await challenge.setUser(await User.findByToken(context.authorization)); //use in final code
-    // await challenge.setUser(await User.findByPk(1)); //this line used for testing routes
     return challenge;
   },
 };
@@ -62,7 +60,7 @@ const completeChallenge = {
   args: {
     id: { type: GraphQLID },
   },
-  async resolve(parent, args, context) {
+  async resolve(parent, args) {
     let challenge = await Challenge.findByPk(args.id);
     challenge.completed = true;
     challenge.save();

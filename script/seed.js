@@ -4,11 +4,10 @@ const {
   db,
   User,
   Badge,
-  Challenge,
   Budget,
   Friend,
   Account,
-  multiPlayerChallenge
+  multiPlayerChallenge,
 } = require("../db");
 require("dotenv").config();
 
@@ -75,27 +74,7 @@ async function seed() {
     auth_token: process.env.DEFAULT_PLAID,
   });
   await users[0].addAccount(acct);
-  await users[1].addAccount(acct)
-
-  // const challenges = await Promise.all([
-  //   Challenge.create({
-  //     type: "big-saver",
-  //     endDate: "2021-05-31 06:00:00",
-  //     completed: false,
-  //   }),
-  //   Challenge.create({
-  //     type: "big-spender",
-  //     endDate: "2021-07-31 06:00:00",
-  //     completed: false,
-  //   }),
-  // ]);
-
-  // await challenges[0].setUser(users[1]);
-  // await challenges[0].setUser(users[0]);
-  // await challenges[1].setUser(users[2]);
-  // await challenges[0].setUser(users[3]);
-  // await challenges[0].setUser(users[4]);
-  // await challenges[1].setUser(users[5]);
+  await users[1].addAccount(acct);
 
   const badges = await Promise.all([
     Badge.create({
@@ -159,19 +138,17 @@ async function seed() {
       badgeImage: "boulder",
     }),
   ]);
-  const date = new Date()
+  const date = new Date();
 
   const challenge = await multiPlayerChallenge.create({
-    name: 'food challenge',
+    name: "food challenge",
     endDate: date.toString(),
-    startDate: new Date('2020-05-23 18:17:15-04'),
+    startDate: new Date("2020-05-23 18:17:15-04"),
     badgeImage: "boulder",
     winCondition: "GREATER_THAN",
     winAmount: 100,
-    category: 'Food and Drink',
-
-  })
-
+    category: "Food and Drink",
+  });
 
   await users[0].addBadge(badges[0]);
   await users[0].addBadge(badges[1]);
@@ -191,8 +168,8 @@ async function seed() {
   await users[4].addBadge(badges[13]);
   await users[5].addBadge(badges[14]);
 
-  await badges[0].setChallenge(challenge)
-  await challenge.addUsers([users[0],users[1]])
+  await badges[0].setChallenge(challenge);
+  await challenge.addUsers([users[0], users[1]]);
 
   const budgets = await Promise.all([
     Budget.create({
