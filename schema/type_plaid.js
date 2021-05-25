@@ -131,13 +131,17 @@ const plaid = {
 
       // Updating current amount
       const expenseByCategory = currentMonthCalc(res.data.transactions);
-      for (let category in expenseByCategory) {
-        const budgetVar = await Budget.update(
-          { currentAmount: expenseByCategory[category] * 100 },
-          { where: { userId: user.id, category, isCompleted: false } }
-        );
-      }
 
+      for (let category in expenseByCategory) {
+        try {
+          await Budget.update(
+            { currentAmount: Math.floor(expenseByCategory[category] * 100) },
+            { where: { userId: user.id, category, isCompleted: false } }
+          );
+        } catch (err) {
+          throw new Error(err);
+        }
+      }
       // Getting institution data
       const insitutionID = res.data.item.institution_id;
       const request = {
@@ -151,7 +155,6 @@ const plaid = {
         request
       );
       const { institution } = inst_data;
-
       return { ...res.data, institution };
     } catch (err) {
       throw new Error(err);
