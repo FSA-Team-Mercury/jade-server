@@ -39,6 +39,7 @@ router.post("/link/token/create", async (req, res, next) => {
     res.send(data);
   } catch (error) {
     // handle error
+    console.log("error in plaid");
     next(error);
   }
 });
