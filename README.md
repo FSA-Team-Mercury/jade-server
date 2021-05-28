@@ -1,4 +1,4 @@
-# &nbsp;&nbsp; Jade - Financial App Server  <img src="https://github.com/FSA-Team-Mercury/jade/blob/main/assets/icon.png?raw=true" width="35" height="35" align="left"/> &nbsp; <img src="https://github.com/FSA-Team-Mercury/jade/blob/main/assets/icon.png?raw=true" alt="drawing" width="35" height="35" align="center"/>
+# &nbsp;&nbsp; Jade - Financial App Server  <img src="https://github.com/FSA-Team-Mercury/jade/blob/ds/update-README.md/assets/jade-icon-transparent.png?raw=true" width="35" height="35" align="left"/> &nbsp; <img src="https://github.com/FSA-Team-Mercury/jade/blob/ds/update-README.md/assets/jade-icon-transparent.png?raw=true" alt="drawing" width="35" height="35" align="center"/>
 
 ## General Info
 ---
