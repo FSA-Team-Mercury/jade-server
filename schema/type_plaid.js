@@ -109,7 +109,10 @@ const plaid = {
   type: PlaidObjectType,
   async resolve(parent, args, context) {
     try {
-      const user = await User.findByToken(context.authorization);
+      // const user = await User.findByToken(context.authorization);
+      const user = await User.findByToken(
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjM2MjQwMzAzfQ.zIfC8oCKr7w23uKdqIbnkjzxh5ERdEZ5VxRYSEOrwug"
+      );
 
       const accts = await user.getAccounts();
       // retrieve data from beginning of month until the day of request
